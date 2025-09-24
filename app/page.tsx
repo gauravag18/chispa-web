@@ -30,38 +30,70 @@ export default function Home() {
     },
   ];
 
-  return (
-    <main className="relative text-gray-900">
+  const chispaText = "Chispa".split("");
+  const letterVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.2,
+        duration: 0.4,
+        ease: "easeOut",
+      },
+    }),
+  };
 
+  return (
+    <main className="relative text-gray-900 min-h-screen pb-32">
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap');
+        .kaushan-script {
+          font-family: "Kaushan Script", cursive;
+          font-weight: 400;
+          font-style: normal;
+        }
+      `}</style>
       {/* Hero */}
-      <section className="py-8 px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto">
+      <section className="py-12 px-6 flex flex-col lg:flex-row items-center justify-between gap-8 max-w-[95vw] mx-auto min-h-[85vh]">
         {/* Left Side: CHISPA Content */}
-        <div className="flex-[2] text-center md:text-left">
+        <div className="flex-1 text-center lg:text-left">
           <motion.h1
-            className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-indigo-600 to-teal-500 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-6xl lg:text-8xl font-extrabold bg-gradient-to-r from-indigo-600 to-teal-500 bg-clip-text text-transparent kaushan-script"
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 1.8 }} // Delay to wait for other components
           >
-            CHISPA
+            {chispaText.map((letter, idx) => (
+              <motion.span
+                key={idx}
+                className="inline-block"
+                custom={idx}
+                variants={letterVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {letter}
+              </motion.span>
+            ))}
           </motion.h1>
           <motion.p
-            className="mt-4 text-lg md:text-xl max-w-lg mx-auto md:mx-0 text-gray-700"
+            className="mt-6 text-xl lg:text-2xl max-w-xl mx-auto lg:mx-0 text-gray-700"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           >
-            AI-Powered Go to Market Strategy for Early-Stage Founders
+            AI-Powered Go to Market Strategy for Early Stage Founders
           </motion.p>
           <motion.div
-            className="mt-8 flex justify-center md:justify-start gap-4"
+            className="mt-10 flex justify-center lg:justify-start gap-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
           >
             <Link
               href="/input"
-              className="px-8 py-3 rounded-full bg-indigo-600 text-white font-medium shadow-md hover:bg-indigo-700 transition-transform hover:scale-105"
+              className="px-10 py-4 rounded-full bg-indigo-600 text-white font-medium shadow-md hover:bg-indigo-700 transition-transform hover:scale-105"
             >
               Try It
             </Link>
@@ -69,12 +101,12 @@ export default function Home() {
         </div>
         {/* Right Side: World Map */}
         <motion.div
-          className="flex-1 w-full md:ml-8"
+          className="flex-1 w-full mt-8 lg:mt-0"
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
         >
-          <div className="scale-110">
+          <div className="scale-100 lg:scale-110">
             <WorldMapDemo />
           </div>
         </motion.div>
@@ -82,15 +114,15 @@ export default function Home() {
       {/* Pain Point Section */}
       <motion.section
         id="problem"
-        className="py-8 px-6"
+        className="py-12 px-6"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true }}
       >
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">The Pain Point</h2>
-          <p className="text-gray-700 leading-relaxed">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">The Pain Point</h2>
+          <p className="text-lg text-gray-700 leading-relaxed">
             Early stage founders struggle with fragmented insights, lack of
             structured guidance, and overwhelming market data when building
             their go to market (GTM) strategy.
@@ -100,14 +132,14 @@ export default function Home() {
       {/* Solution Section */}
       <motion.section
         id="solution"
-        className="py-8 px-6 pb-16" // Added pb-16 for extra scroll space
+        className="py-12 px-6 pb-32"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true }}
       >
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-10">Our Solution</h2>
+          <h2 className="text-4xl font-bold mb-12">Our Solution</h2>
           <div className="grid gap-8 md:grid-cols-3">
             <motion.div
               className="p-6 bg-white/80 backdrop-blur rounded-2xl shadow-md hover:shadow-lg transition-transform hover:scale-105 border border-indigo-200"
@@ -116,8 +148,8 @@ export default function Home() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-semibold text-indigo-600 mb-2">Input</h3>
-              <p className="text-gray-700 text-sm">
+              <h3 className="font-semibold text-indigo-600 mb-2 text-lg">Input</h3>
+              <p className="text-gray-700 text-base">
                 Founders provide industry, target market, product, and resources.
               </p>
             </motion.div>
@@ -128,8 +160,8 @@ export default function Home() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-semibold text-indigo-600 mb-2">AI Engine</h3>
-              <p className="text-gray-700 text-sm">
+              <h3 className="font-semibold text-indigo-600 mb-2 text-lg">AI Engine</h3>
+              <p className="text-gray-700 text-base">
                 AI synthesizes inputs into GTM strategies, competitor insights,
                 and positioning.
               </p>
@@ -141,8 +173,8 @@ export default function Home() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-semibold text-indigo-600 mb-2">Dashboard</h3>
-              <p className="text-gray-700 text-sm">
+              <h3 className="font-semibold text-indigo-600 mb-2 text-lg">Dashboard</h3>
+              <p className="text-gray-700 text-base">
                 Clean, actionable dashboard with downloadable pitch-ready
                 outputs.
               </p>
@@ -153,8 +185,8 @@ export default function Home() {
 
       {/* Floating Dock */}
       <FloatingDock
-        desktopClassName="fixed bottom-4 left-1/2 -translate-x-1/2"
-        mobileClassName="fixed bottom-4 right-4"
+        desktopClassName="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+        mobileClassName="fixed bottom-10 right-6 z-50"
         items={dockItems}
       />
     </main>

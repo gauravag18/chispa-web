@@ -69,7 +69,7 @@ export default function History() {
   };
 
   return (
-    <div className="text-gray-900 min-h-screen w-60vh">
+    <div className="text-gray-900 min-h-screen w-50%">
       <motion.div
         className="w-full border-t-4 border-indigo-600 pt-8 pb-6"
         initial={{ opacity: 0, y: -20 }}
