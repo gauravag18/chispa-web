@@ -4,14 +4,9 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import your business logic
-# Ensure these exist: generate_dashboard(input_json: dict) -> dict
-# and regenerate_for_tab(tab: str, prompt: str) -> str
-from src.generate_strategy import generate_dashboard, regenerate_for_tab  # adjust import path as needed
+from src.generate_strategy import generate_dashboard, regenerate_for_tab  # now exists
 
 app = FastAPI()
-
-# Allow your Next.js origin(s)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "https://your-prod-domain.com"],
@@ -19,6 +14,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def _map_file(input_json: dict, file: UploadFile):
+    # Normalize UploadFile -> multimodal keys expected by processor
+    mime = (file.content_type or "").lower()
+    input_json["file_name"] = file.filename
+    input_json["file_mime"] = mime
+    return input_json
 
 @app.post("/generate_strategy")
 async def generate_strategy(
@@ -32,16 +34,13 @@ async def generate_strategy(
         "target_audience": target_audience,
         "value_proposition": value_proposition,
     }
-
     if file:
         content = await file.read()
         input_json["file_bytes"] = content
-        input_json["file_name"] = file.filename
-        input_json["file_mime"] = file.content_type
+        input_json = _map_file(input_json, file)
 
     try:
-        result = generate_dashboard(input_json)
-        return result
+        return generate_dashboard(input_json)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

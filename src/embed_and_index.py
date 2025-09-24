@@ -21,7 +21,7 @@ with open(INP, encoding="utf-8") as f:
 emb = model.encode(texts, batch_size=64, show_progress_bar=True, normalize_embeddings=True)
 np.save(EMB_NPY, emb)
 
-index = faiss.IndexFlatIP(emb.shape[1])  # cosine via normalized dot product
+index = faiss.IndexFlatIP(emb.shape[1])
 index.add(emb.astype(np.float32))
 faiss.write_index(index, str(INDEX_BIN))
 
