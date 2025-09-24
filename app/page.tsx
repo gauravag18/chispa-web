@@ -3,7 +3,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { WorldMapDemo } from "../components/ui/world-map-demo";
 import { FloatingDock } from "../components/ui/floating-dock";
-import { IconArrowUp, IconHistory, IconHome } from "@tabler/icons-react";
+import { IconArrowUp, IconHistory, IconHome, IconArrowDown } from "@tabler/icons-react";
+import { useRef } from "react";
 
 export default function Home() {
   const dockItems = [
@@ -44,6 +45,12 @@ export default function Home() {
     }),
   };
 
+  const painPointRef = useRef<HTMLElement>(null);
+
+  const scrollToPainPoint = () => {
+    painPointRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <main className="relative text-gray-900 min-h-screen pb-32">
       <style jsx global>{`
@@ -59,10 +66,10 @@ export default function Home() {
         {/* Left Side: CHISPA Content */}
         <div className="flex-1 text-center lg:text-left">
           <motion.h1
-            className="text-6xl lg:text-8xl font-extrabold bg-gradient-to-r from-indigo-600 to-teal-500 bg-clip-text text-transparent kaushan-script"
+            className="text-6xl lg:text-8xl font-extrabold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent kaushan-script"
             initial="hidden"
             animate="visible"
-            transition={{ delay: 1.8 }} // Delay to wait for other components
+            transition={{ delay: 1.8 }}
           >
             {chispaText.map((letter, idx) => (
               <motion.span
@@ -111,9 +118,28 @@ export default function Home() {
           </div>
         </motion.div>
       </section>
+      {/* Explore Section */}
+      <motion.section
+        className="py-1 px-6 text-center -mt-12"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true }}
+      >
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={scrollToPainPoint}
+            className="flex items-center justify-center mx-auto gap-2 px-8 py-3 rounded-full bg-orange-500 text-white font-medium shadow-md hover:bg-orange-600 transition-transform hover:scale-105"
+          >
+            <span>Explore Our Approach</span>
+            <IconArrowDown className="h-6 w-6" />
+          </button>
+        </div>
+      </motion.section>
       {/* Pain Point Section */}
       <motion.section
         id="problem"
+        ref={painPointRef}
         className="py-12 px-6"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -182,7 +208,6 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-
       {/* Floating Dock */}
       <FloatingDock
         desktopClassName="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
