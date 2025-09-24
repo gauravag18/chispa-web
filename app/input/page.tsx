@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -12,7 +12,7 @@ interface FormData {
   uploads: File[];
 }
 
-const targetAudienceOptions = [
+const TARGET_AUDIENCE_OPTIONS = [
   'Small Businesses (1-50 employees)',
   'Medium Enterprises (51-500 employees)',
   'Large Corporations (500+ employees)',
@@ -22,8 +22,128 @@ const targetAudienceOptions = [
   'Healthcare Organizations',
   'Educational Institutions',
   'Non-profit Organizations',
-  'Other (specify below)'
-];
+  'Other (specify below)',
+] as const;
+
+const FORM_FIELDS = [
+  { field: 'businessIdea', label: 'Business Idea' },
+  { field: 'targetAudience', label: 'Target Audience' },
+  { field: 'uniqueValueProposition', label: 'Value Proposition' },
+  { field: 'uploads', label: 'Files (Optional)' },
+] as const;
+
+const CheckIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+    <path
+      fillRule="evenodd"
+      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+    />
+  </svg>
+);
+
+const FileIcon = () => (
+  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+    />
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    />
+  </svg>
+);
+
+function LockableInput({
+  field,
+  value,
+  locked,
+  placeholders,
+  onChange,
+  onSubmit,
+  onUnlock,
+  label,
+  description,
+}: {
+  field: keyof FormData;
+  value: string;
+  locked: boolean;
+  placeholders: string[];
+  onChange: (field: keyof FormData, value: string) => void;
+  onSubmit: (field: keyof FormData, value: string) => void;
+  onUnlock: (field: keyof FormData) => void;
+  label: string;
+  description: string;
+}) {
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      if (inputValue.trim()) {
+        onChange(field, inputValue);
+        onSubmit(field, inputValue);
+      }
+    },
+    [field, onChange, onSubmit],
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center space-x-2">
+        <label className="text-lg font-semibold text-gray-900">{label}</label>
+        <span className="text-red-500">*</span>
+      </div>
+      <p className="text-gray-600">{description}</p>
+      {locked ? (
+        <div className="relative group">
+          <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
+            <div className="slide-in-green"></div>
+            <span className="flex-1 pr-4 z-10">{value || `No ${field} entered`}</span>
+            <button
+              type="button"
+              onClick={() => onUnlock(field)}
+              className="flex-shrink-0 p-2 text-indigo-600 hover:text-indigo-800 hover:bg-white rounded-lg transition-all duration-200 z-10"
+              title={`Edit ${field}`}
+            >
+              <EditIcon />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div onBlur={handleBlur}>
+          <PlaceholdersAndVanishInput
+            placeholders={placeholders}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value)}
+            onSubmit={(e: React.FormEvent) => {
+              e.preventDefault();
+              onSubmit(field, value);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function InputPage() {
   const [formData, setFormData] = useState<FormData>({
@@ -31,362 +151,285 @@ export default function InputPage() {
     targetAudience: '',
     customAudience: '',
     uniqueValueProposition: '',
-    uploads: []
+    uploads: [],
   });
-  const [files, setFiles] = useState<File[]>([]);
-  const [showReview, setShowReview] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-
-  // Lock states for each field
+  
   const [lockedFields, setLockedFields] = useState({
     businessIdea: false,
     targetAudience: false,
     customAudience: false,
-    uniqueValueProposition: false
+    uniqueValueProposition: false,
   });
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
-  const handleInputBlur = (field: keyof typeof lockedFields, value: string) => {
+  const handleInputSubmit = useCallback((field: keyof FormData, value: string) => {
     if (value.trim()) {
-      setLockedFields(prev => ({
-        ...prev,
-        [field]: true
-      }));
-    }
-  };
-
-  const handleInputSubmit = (field: keyof typeof lockedFields, value: string) => {
-    if (value.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value
-      }));
+      setFormData((prev) => ({ ...prev, [field]: value }));
       setTimeout(() => {
-        setLockedFields(prev => ({
-          ...prev,
-          [field]: true
-        }));
+        setLockedFields((prev) => ({ ...prev, [field]: true }));
       }, 500);
     }
-  };
+  }, []);
 
-  const unlockField = (field: keyof typeof lockedFields) => {
-    setLockedFields(prev => ({
+  const unlockField = useCallback((field: keyof FormData) => {
+    setLockedFields((prev) => ({ ...prev, [field]: false }));
+  }, []);
+
+  const handleFileUpload = useCallback((newFiles: File[]) => {
+    setFormData((prev) => ({ ...prev, uploads: newFiles }));
+  }, []);
+
+  const removeFile = useCallback((index: number) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: false
+      uploads: prev.uploads.filter((_, i) => i !== index),
     }));
-  };
+  }, []);
 
-  const handleFileUpload = (files: File[]) => {
-    setFiles(files);
-    setFormData(prev => ({
-      ...prev,
-      uploads: files
-    }));
-    console.log(files);
-  };
-
-  const removeFile = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      uploads: prev.uploads.filter((_, i) => i !== index)
-    }));
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const isFormValid = () => {
-    return formData.businessIdea.trim() && 
-           formData.targetAudience && 
-           formData.uniqueValueProposition.trim();
-  };
-
-  const handleSubmit = () => {
-    if (isFormValid()) {
-      console.log('Form submitted:', formData);
-      // Navigate to results or show success message
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
-  };
-
-  if (showReview) {
+  const isFormValid = useMemo(() => {
     return (
-      <div className="min-h-screen">
-        <div className="max-w-3xl mx-auto p-6 sm:p-8">
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold text-[#111827] mb-2">Review Your Information</h1>
-            <p className="text-[#6B7280] text-lg">Please confirm your details before generating your strategy</p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="p-4 bg-[#FFFFFF] rounded-lg border border-[#E5E7EB] shadow-sm">
-              <h3 className="font-semibold text-[#111827] mb-2">Business Idea</h3>
-              <p className="text-[#6B7280]">{formData.businessIdea}</p>
-            </div>
-
-            <div className="p-4 bg-[#FFFFFF] rounded-lg border border-[#E5E7EB] shadow-sm">
-              <h3 className="font-semibold text-[#111827] mb-2">Target Audience</h3>
-              <p className="text-[#6B7280]">
-                {formData.targetAudience}
-                {formData.customAudience && ` - ${formData.customAudience}`}
-              </p>
-            </div>
-
-            <div className="p-4 bg-[#FFFFFF] rounded-lg border border-[#E5E7EB] shadow-sm">
-              <h3 className="font-semibold text-[#111827] mb-2">Unique Value Proposition</h3>
-              <p className="text-[#6B7280]">{formData.uniqueValueProposition}</p>
-            </div>
-
-            {formData.uploads.length > 0 && (
-              <div className="p-4 bg-[#FFFFFF] rounded-lg border border-[#E5E7EB] shadow-sm">
-                <h3 className="font-semibold text-[#111827] mb-2">Uploaded Files</h3>
-                <div className="space-y-1">
-                  {formData.uploads.map((file, index) => (
-                    <p key={index} className="text-[#6B7280] text-sm">{file.name}</p>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-4 mt-6">
-            <button
-              onClick={() => setShowReview(false)}
-              className="flex-1 px-6 py-3 border border-[#E5E7EB] text-[#6B7280] rounded-lg hover:bg-[#EEF2FF] transition-colors font-medium"
-            >
-              Back to Edit
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="flex-1 px-6 py-3 bg-[#6366F1] text-white rounded-lg hover:bg-[#4F46E5] transition-colors font-medium"
-            >
-              Generate Strategy
-            </button>
-          </div>
-        </div>
-      </div>
+      formData.businessIdea.trim() &&
+      formData.targetAudience &&
+      formData.uniqueValueProposition.trim()
     );
-  }
+  }, [formData]);
+
+  const handleSubmit = useCallback(() => {
+    if (isFormValid) {
+      console.log('Form submitted:', formData);
+    }
+  }, [formData, isFormValid]);
+
+  const isFieldCompleted = useCallback((field: string) => {
+    if (field === 'uploads') return formData.uploads.length > 0;
+    return Boolean(formData[field as keyof FormData]);
+  }, [formData]);
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-3xl mx-auto p-6 sm:p-8">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-[#111827] mb-2">Business Strategy Generator</h1>
-          <p className="text-[#6B7280] text-lg">Tell us about your business idea and we'll create a comprehensive strategy</p>
-        </div>
+      {/* Enhanced Header */}
+      <div className="bg-black shadow-lg rounded-2xl my-5">
+  <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold text-white mb-2">
+        Business Strategy Generator
+      </h1>
+      <p className="text-indigo-100 text-lg opacity-90">
+        Transform your idea into a comprehensive strategy
+      </p>
+    </div>
+  </div>
+</div>
 
-        <div className="space-y-4">
-          {/* Business Idea */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-[#111827] mb-1">
-              Business Idea *
-            </label>
-            <div className="relative">
-              {lockedFields.businessIdea ? (
-                <div className="w-full p-3 border border-[#E5E7EB] rounded-lg bg-[#FFFFFF] text-[#6B7280] flex items-center justify-between shadow-sm">
-                  <span className="truncate">{formData.businessIdea || 'No content entered'}</span>
-                  <button
-                    type="button"
-                    onClick={() => unlockField('businessIdea')}
-                    className="ml-2 text-[#6366F1] hover:text-[#4F46E5] flex-shrink-0"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-2.257A6 6 0 0111 7h4zm-5 8v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1z" />
-                    </svg>
-                  </button>
-                </div>
-              ) : (
-                <div onBlur={(e) => {
-                  const value = (e.target as HTMLInputElement).value;
-                  if (value.trim()) {
-                    handleInputChange('businessIdea', value);
-                    handleInputBlur('businessIdea', value);
-                  }
-                }}>
-                  <PlaceholdersAndVanishInput 
-                    placeholders={["AI-powered customer service platform", "Sustainable fashion marketplace", "Remote team collaboration tool", "Health tracking mobile app", "Local food delivery service"]} 
-                    onChange={(e) => handleInputChange('businessIdea', e.target.value)} 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleInputSubmit('businessIdea', formData.businessIdea);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Target Audience */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-[#111827] mb-1">
-              Target Audience *
-            </label>
-            <div className="relative">
-              {lockedFields.targetAudience ? (
-                <div className="w-full p-3 border border-[#E5E7EB] rounded-lg bg-[#FFFFFF] text-[#6B7280] flex items-center justify-between shadow-sm">
-                  <span className="truncate">{formData.targetAudience || 'No audience selected'}</span>
-                  <button
-                    type="button"
-                    onClick={() => unlockField('targetAudience')}
-                    className="ml-2 text-[#6366F1] hover:text-[#4F46E5] flex-shrink-0"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-2.257A6 6 0 0111 7h4zm-5 8v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1z" />
-                    </svg>
-                  </button>
-                </div>
-              ) : (
-                <select
-                  value={formData.targetAudience}
-                  onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-                  onBlur={(e) => handleInputBlur('targetAudience', e.target.value)}
-                  className="w-full p-3 border border-[#E5E7EB] rounded-lg bg-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-[#6366F1] focus:border-transparent shadow-sm"
-                  required
-                >
-                  <option value="">Select your target audience</option>
-                  {targetAudienceOptions.map((option) => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-            
-            {formData.targetAudience === 'Other (specify below)' && (
-              <div className="mt-2 relative">
-                {lockedFields.customAudience ? (
-                  <div className="w-full p-3 border border-[#E5E7EB] rounded-lg bg-[#FFFFFF] text-[#6B7280] flex items-center justify-between shadow-sm">
-                    <span className="truncate">{formData.customAudience || 'No custom audience specified'}</span>
-                    <button
-                      type="button"
-                      onClick={() => unlockField('customAudience')}
-                      className="ml-2 text-[#6366F1] hover:text-[#4F46E5] flex-shrink-0"
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Complete Your Profile</h3>
+              <div className="space-y-6">
+                {FORM_FIELDS.map(({ field, label }, index) => (
+                  <div key={field} className="flex items-center space-x-4">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        isFieldCompleted(field)
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-gray-100 text-gray-400'
+                      }`}
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-2.257A6 6 0 0111 7h4zm-5 8v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1z" />
-                      </svg>
-                    </button>
+                      {isFieldCompleted(field) ? <CheckIcon /> : index + 1}
+                    </div>
+                    <span className="text-gray-700">{label}</span>
                   </div>
-                ) : (
-                  <div onBlur={(e) => {
-                    const value = (e.target as HTMLInputElement).value;
-                    if (value.trim()) {
-                      handleInputChange('customAudience', value);
-                      handleInputBlur('customAudience', value);
-                    }
-                  }}>
-                    <PlaceholdersAndVanishInput 
-                      placeholders={["Freelancers and consultants", "Pet owners aged 25-45", "College students", "Rural small business owners", "Gaming enthusiasts"]} 
-                      onChange={(e) => handleInputChange('customAudience', e.target.value)} 
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleInputSubmit('customAudience', formData.customAudience);
-                      }}
-                    />
-                  </div>
-                )}
+                ))}
               </div>
-            )}
+            </div>
+
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
+              <h4 className="font-semibold text-gray-900 mb-3">💡 Pro Tips</h4>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>• Be specific about your target market</li>
+                <li>• Focus on unique benefits, not features</li>
+                <li>• Include measurable outcomes when possible</li>
+                <li>• Upload competitor analysis for better insights</li>
+              </ul>
+            </div>
           </div>
 
-          {/* Unique Value Proposition */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-[#111827] mb-1">
-              Unique Value Proposition *
-            </label>
-            <div className="relative">
-              {lockedFields.uniqueValueProposition ? (
-                <div className="w-full p-3 border border-[#E5E7EB] rounded-lg bg-[#FFFFFF] text-[#6B7280] flex items-center justify-between shadow-sm">
-                  <span className="truncate">{formData.uniqueValueProposition || 'No value proposition entered'}</span>
+          <div className="lg:col-span-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="p-8 space-y-8">
+                <LockableInput
+                  field="businessIdea"
+                  value={formData.businessIdea}
+                  locked={lockedFields.businessIdea}
+                  placeholders={[
+                    'AI-powered customer service platform',
+                    'Sustainable fashion marketplace',
+                    'Remote team collaboration tool',
+                    'Health tracking mobile app',
+                    'Local food delivery service',
+                  ]}
+                  onChange={handleInputChange}
+                  onSubmit={handleInputSubmit}
+                  onUnlock={unlockField}
+                  label="Business Idea"
+                  description="Describe your business concept in one clear sentence"
+                />
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-lg font-semibold text-gray-900">Target Audience</label>
+                    <span className="text-red-500">*</span>
+                  </div>
+                  <p className="text-gray-600">Who are you building this for?</p>
+                  {lockedFields.targetAudience ? (
+                    <div className="relative group">
+                      <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
+                        <div className="slide-in-green"></div>
+                        <span className="flex-1 pr-4 z-10">
+                          {formData.targetAudience || 'No audience selected'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => unlockField('targetAudience')}
+                          className="flex-shrink-0 p-2 text-indigo-600 hover:text-indigo-800 hover:bg-white rounded-lg transition-all duration-200 z-10"
+                          title="Edit target audience"
+                        >
+                          <EditIcon />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <select
+                      value={formData.targetAudience}
+                      onChange={(e) => handleInputChange('targetAudience', e.target.value)}
+                      onBlur={(e) => handleInputSubmit('targetAudience', e.target.value)}
+                      className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-gray-800"
+                      required
+                    >
+                      <option value="">Select your target audience</option>
+                      {TARGET_AUDIENCE_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {formData.targetAudience === 'Other (specify below)' && (
+                    <div className="mt-4 space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Specify your custom audience
+                      </label>
+                      <LockableInput
+                        field="customAudience"
+                        value={formData.customAudience}
+                        locked={lockedFields.customAudience}
+                        placeholders={[
+                          'Freelancers and consultants',
+                          'Pet owners aged 25-45',
+                          'College students',
+                          'Rural small business owners',
+                          'Gaming enthusiasts',
+                        ]}
+                        onChange={handleInputChange}
+                        onSubmit={handleInputSubmit}
+                        onUnlock={unlockField}
+                        label="Custom Audience"
+                        description=""
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <LockableInput
+                  field="uniqueValueProposition"
+                  value={formData.uniqueValueProposition}
+                  locked={lockedFields.uniqueValueProposition}
+                  placeholders={[
+                    'Save customers 50% time with AI automation',
+                    'Zero waste packaging for eco-conscious consumers',
+                    '24/7 support with 99% uptime guarantee',
+                    'Personalized learning paths for every student',
+                    'Same-day delivery within 10 miles',
+                  ]}
+                  onChange={handleInputChange}
+                  onSubmit={handleInputSubmit}
+                  onUnlock={unlockField}
+                  label="Unique Value Proposition"
+                  description="What makes your solution uniquely valuable?"
+                />
+
+                <div className="space-y-3">
+                  <label className="text-lg font-semibold text-gray-900">Supporting Documents</label>
+                  <p className="text-gray-600">
+                    Upload screenshots, competitor analysis, market research, or any relevant files
+                  </p>
+                  <div className="border-2 border-dashed border-teal-300 bg-teal-50 rounded-xl p-6 hover:border-teal-400 hover:bg-teal-100 transition-all duration-200">
+                    <FileUpload onChange={handleFileUpload} />
+                  </div>
+                  {formData.uploads.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      <h4 className="font-medium text-gray-900">Uploaded Files ({formData.uploads.length})</h4>
+                      <div className="grid gap-3">
+                        {formData.uploads.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <FileIcon />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 truncate">{file.name}</p>
+                                <p className="text-sm text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(index)}
+                              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
+                              title="Remove file"
+                            >
+                              <DeleteIcon />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 px-8 py-6 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    {isFormValid ? (
+                      <span className="text-green-600 font-medium">✓ Ready to generate your strategy</span>
+                    ) : (
+                      <span>Fill in all required fields to continue</span>
+                    )}
+                  </div>
                   <button
                     type="button"
-                    onClick={() => unlockField('uniqueValueProposition')}
-                    className="ml-2 text-[#6366F1] hover:text-[#4F46E5] flex-shrink-0"
+                    onClick={handleSubmit}
+                    disabled={!isFormValid}
+                    className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform ${
+                      isFormValid
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    }`}
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-2.257A6 6 0 0111 7h4zm-5 8v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1z" />
-                    </svg>
+                    Generate Strategy →
                   </button>
                 </div>
-              ) : (
-                <div onBlur={(e) => {
-                  const value = (e.target as HTMLInputElement).value;
-                  if (value.trim()) {
-                    handleInputChange('uniqueValueProposition', value);
-                    handleInputBlur('uniqueValueProposition', value);
-                  }
-                }}>
-                  <PlaceholdersAndVanishInput 
-                    placeholders={["Save customers 50% time with AI automation", "Zero waste packaging for eco-conscious consumers", "24/7 support with 99% uptime guarantee", "Personalized learning paths for every student", "Same-day delivery within 10 miles"]} 
-                    onChange={(e) => handleInputChange('uniqueValueProposition', e.target.value)} 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleInputSubmit('uniqueValueProposition', formData.uniqueValueProposition);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium text-[#111827] mb-1">
-              Optional Uploads
-            </label>
-            <p className="text-sm text-[#6B7280] mb-2">
-              Upload screenshots, competitor sites, or any relevant files
-            </p>
-            
-            <div className="w-full border border-dashed border-[#14B8A6] bg-[#F0FDFA] rounded-lg p-4 focus-within:ring-2 focus-within:ring-[#14B8A6] focus-within:ring-opacity-50">
-              <FileUpload onChange={handleFileUpload} />
-            </div>
-
-            {formData.uploads.length > 0 && (
-              <div className="mt-3">
-                <h4 className="text-sm font-medium text-[#111827] mb-2">Uploaded Files:</h4>
-                <div className="space-y-2">
-                  {formData.uploads.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-[#FFFFFF] rounded border border-[#E5E7EB] shadow-sm">
-                      <span className="text-sm text-[#6B7280] truncate">{file.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="text-[#EF4444] hover:text-[#DC2626] ml-2"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
               </div>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <div className="pt-4">
-            <button
-              type="button"
-              onClick={() => setShowReview(true)}
-              disabled={!isFormValid()}
-              className={`w-full py-3 px-6 rounded-lg font-medium transition-colors shadow-sm ${
-                isFormValid()
-                  ? 'bg-[#6366F1] text-white hover:bg-[#4F46E5]'
-                  : 'bg-[#E5E7EB] text-[#6B7280] cursor-not-allowed'
-              }`}
-            >
-              Confirm & Submit
-            </button>
+            </div>
           </div>
         </div>
       </div>

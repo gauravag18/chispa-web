@@ -1,169 +1,377 @@
-import React from 'react';
-import { TrendingUp, Activity, Users, BarChart3, User, Settings, Bell, Zap, RefreshCw } from 'lucide-react';
+'use client';
 
-const Dashboard = () => {
-  // Sample data for demonstration
-  const kpiData1 = [
-    { title: 'Total Revenue', value: '$124,532', change: '+12.5%', trend: 'up', icon: TrendingUp },
-    { title: 'Active Users', value: '8,429', change: '+3.2%', trend: 'up', icon: Users }
-  ];
+import { useState, useCallback } from 'react';
+import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 
-  const kpiData2 = [
-    { title: 'Conversion Rate', value: '3.24%', change: '-0.8%', trend: 'down', icon: BarChart3 },
-    { title: 'Performance Score', value: '94.2', change: '+2.1%', trend: 'up', icon: Activity }
-  ];
+interface TabData {
+  campaignName: string;
+  selectedTab: string;
+}
 
-  const inputFields = [
-    { label: 'Project Name', placeholder: 'Enter project name...' },
-    { label: 'Description', placeholder: 'Brief description...' },
-    { label: 'Budget', placeholder: 'Enter budget amount...' },
-    { label: 'Timeline', placeholder: 'Expected completion...' }
-  ];
+const TABS = [
+  { id: 'personas', label: 'Personas' },
+  { id: 'messaging', label: 'Messaging/Copy' },
+  { id: 'channels', label: 'Channel Ranking' },
+  { id: 'calendar', label: 'Content Calendar' },
+  { id: 'budget', label: 'Budget/KPIs' },
+] as const;
 
-  const ideasHistory = [
-    { title: 'AI-Powered Analytics', date: '2 days ago', status: 'In Progress' },
-    { title: 'Mobile App Redesign', date: '1 week ago', status: 'Completed' },
-    { title: 'Customer Portal', date: '2 weeks ago', status: 'Planning' },
-    { title: 'Performance Optimization', date: '3 weeks ago', status: 'Review' }
-  ];
+const CheckIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+    <path
+      fillRule="evenodd"
+      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
+function LockableInput({
+  field,
+  value,
+  locked,
+  placeholders,
+  onChange,
+  onSubmit,
+  onUnlock,
+  label,
+  description,
+}: {
+  field: keyof TabData;
+  value: string;
+  locked: boolean;
+  placeholders: string[];
+  onChange: (field: keyof TabData, value: string) => void;
+  onSubmit: (field: keyof TabData, value: string) => void;
+  onUnlock: (field: keyof TabData) => void;
+  label: string;
+  description: string;
+}) {
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      if (inputValue.trim()) {
+        onChange(field, inputValue);
+        onSubmit(field, inputValue);
+      }
+    },
+    [field, onChange, onSubmit],
+  );
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 w-full">
-        <div className="flex items-center justify-between max-w-full mx-auto">
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
-              <Bell className="w-5 h-5" />
+    <div className="space-y-3">
+      <div className="flex items-center space-x-2">
+        <label className="text-lg font-semibold text-gray-900">{label}</label>
+        <span className="text-red-500">*</span>
+      </div>
+      <p className="text-gray-600">{description}</p>
+      {locked ? (
+        <div className="relative group">
+          <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
+            <span className="flex-1 pr-4 z-10">{value || `No ${field} entered`}</span>
+            <button
+              type="button"
+              onClick={() => onUnlock(field)}
+              className="flex-shrink-0 p-2 text-indigo-600 hover:text-indigo-800 hover:bg-white rounded-lg transition-all duration-200 z-10"
+              title={`Edit ${field}`}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
             </button>
-            <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
-              <Settings className="w-5 h-5" />
-            </button>
-            <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
-            </div>
           </div>
         </div>
-      </header>
+      ) : (
+        <div onBlur={handleBlur}>
+          <PlaceholdersAndVanishInput
+            placeholders={placeholders}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value)}
+            onSubmit={(e: React.FormEvent) => {
+              e.preventDefault();
+              onSubmit(field, value);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
-      {/* Main Content */}
-      <div className="p-6 w-full">
-        <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
-          {/* Left Column - Dashboard */}
+export default function DashboardPage() {
+  const [tabData, setTabData] = useState<TabData>({
+    campaignName: '',
+    selectedTab: 'personas',
+  });
+  const [lockedFields, setLockedFields] = useState({
+    campaignName: false,
+  });
+
+  const handleInputChange = useCallback((field: keyof TabData, value: string) => {
+    setTabData((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleInputSubmit = useCallback((field: keyof TabData, value: string) => {
+    if (value.trim()) {
+      setTabData((prev) => ({ ...prev, [field]: value }));
+      setTimeout(() => {
+        setLockedFields((prev) => ({ ...prev, [field]: true }));
+      }, 500);
+    }
+  }, []);
+
+  const unlockField = useCallback((field: keyof TabData) => {
+    setLockedFields((prev) => ({ ...prev, [field]: false }));
+  }, []);
+
+  const handleTabChange = useCallback((tab: string) => {
+    setTabData((prev) => ({ ...prev, selectedTab: tab }));
+  }, []);
+
+  const renderTabContent = () => {
+    switch (tabData.selectedTab) {
+      case 'personas':
+        return (
           <div className="space-y-6">
-            {/* Profile Section */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <User className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900">John Doe</h2>
-                <p className="text-gray-600 mb-3">Product Manager</p>
-                <div className="flex justify-center">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800">
-                    Active Profile
-                  </span>
-                </div>
+            <h3 className="text-xl font-semibold text-gray-900">User Personas</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h4 className="font-medium text-gray-900 mb-4">Persona 1: Young Professional</h4>
+              <ul className="text-gray-600 space-y-2">
+                <li><strong>Demographics:</strong> 25-35 years old, urban, single or newly married</li>
+                <li><strong>Pain Points:</strong> Limited time, high career ambitions, tech-savvy</li>
+                <li><strong>Behaviors:</strong> Active on LinkedIn, values efficiency, prefers mobile apps</li>
+              </ul>
+              <h4 className="font-medium text-gray-900 mt-6 mb-4">Persona 2: Small Business Owner</h4>
+              <ul className="text-gray-600 space-y-2">
+                <li><strong>Demographics:</strong> 30-50 years old, suburban, 1-10 employees</li>
+                <li><strong>Pain Points:</strong> Budget constraints, lack of marketing expertise</li>
+                <li><strong>Behaviors:</strong> Seeks cost-effective solutions, active in local business groups</li>
+              </ul>
+            </div>
+          </div>
+        );
+      case 'messaging':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-900">Messaging & Copy</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h4 className="font-medium text-gray-900 mb-4">Sample Slogans</h4>
+              <ul className="text-gray-600 space-y-2">
+                <li>"Empower Your Future: Unleash Limitless Possibilities"</li>
+                <li>"Grow Smarter, Not Harder: Your Success, Our Mission"</li>
+              </ul>
+              <h4 className="font-medium text-gray-900 mt-6 mb-4">Email Copy</h4>
+              <p className="text-gray-600">
+                Subject: Transform Your Business Today!<br />
+                Hi [Name],<br />
+                Ready to take your business to the next level? Our platform offers tailored solutions to save you time and boost your growth. Join thousands of satisfied customers and start today!<br />
+                [CTA Button: Get Started Now]
+              </p>
+            </div>
+          </div>
+        );
+      case 'channels':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-900">Channel Ranking</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <table className="w-full text-left text-gray-600">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="py-2 font-medium">Rank</th>
+                    <th className="py-2 font-medium">Channel</th>
+                    <th className="py-2 font-medium">Justification</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-2">1</td>
+                    <td>Social Media</td>
+                    <td>High engagement, cost-effective, broad reach</td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-2">2</td>
+                    <td>Email Marketing</td>
+                    <td>Personalized, high ROI, direct communication</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">3</td>
+                    <td>SEO</td>
+                    <td>Long-term visibility, organic traffic growth</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      case 'calendar':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-900">Content Calendar</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <table className="w-full text-left text-gray-600">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="py-2 font-medium">Date</th>
+                    <th className="py-2 font-medium">Task</th>
+                    <th className="py-2 font-medium">Channel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-2">Oct 1, 2025</td>
+                    <td>Launch campaign announcement</td>
+                    <td>Social Media</td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-2">Oct 5, 2025</td>
+                    <td>Send promotional email</td>
+                    <td>Email</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Oct 10, 2025</td>
+                    <td>Publish blog post</td>
+                    <td>Website</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      case 'budget':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-900">Budget & KPIs</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h4 className="font-medium text-gray-900 mb-4">Budget Allocation</h4>
+              <table className="w-full text-left text-gray-600">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="py-2 font-medium">Category</th>
+                    <th className="py-2 font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-2">Social Media Ads</td>
+                    <td>$2,000</td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-2">Email Marketing</td>
+                    <td>$1,000</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2">Content Creation</td>
+                    <td>$1,500</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h4 className="font-medium text-gray-900 mt-6 mb-4">Key Performance Indicators</h4>
+              <ul className="text-gray-600 space-y-2">
+                <li><strong>Click-Through Rate:</strong> Target 2.5% on email campaigns</li>
+                <li><strong>Engagement Rate:</strong> Target 10% on social media posts</li>
+                <li><strong>Conversion Rate:</strong> Target 5% on landing pages</li>
+              </ul>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="bg-gray-900 shadow-lg rounded-xl my-5 max-w-7xl mx-auto">
+        <div className="px-6 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-2">Marketing Campaign Dashboard</h1>
+            <p className="text-gray-300 text-lg">Plan and track your marketing strategy</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="mb-8">
+          <LockableInput
+            field="campaignName"
+            value={tabData.campaignName}
+            locked={lockedFields.campaignName}
+            placeholders={[
+              'Spring Product Launch',
+              'Holiday Sales Campaign',
+              'Brand Awareness Drive',
+              'Customer Retention Program',
+              'New Market Expansion',
+            ]}
+            onChange={handleInputChange}
+            onSubmit={handleInputSubmit}
+            onUnlock={unlockField}
+            label="Campaign Name"
+            description="Enter a name for your marketing campaign"
+          />
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Campaign Progress</h3>
+              <div className="space-y-6">
+                {TABS.map(({ id, label }, index) => (
+                  <div key={id} className="flex items-center space-x-4">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        tabData.selectedTab === id
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-gray-100 text-gray-400'
+                      }`}
+                    >
+                      {tabData.selectedTab === id ? <CheckIcon /> : index + 1}
+                    </div>
+                    <span className="text-gray-700">{label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Summary Section */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary Section</h3>
-              <div className="space-y-3 text-gray-600">
-                <p>Welcome to your dashboard! Here's a quick overview of your recent activity and key performance metrics.</p>
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-indigo-600">24</div>
-                    <div className="text-sm text-gray-500">Projects</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-teal-600">98%</div>
-                    <div className="text-sm text-gray-500">Uptime</div>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-white rounded-xl p-8 border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-3">💡 Campaign Tips</h4>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>• Tailor personas to specific audience segments</li>
+                <li>• Craft clear and compelling messaging</li>
+                <li>• Prioritize high-ROI channels</li>
+                <li>• Plan content for consistent engagement</li>
+                <li>• Track KPIs to measure success</li>
+              </ul>
             </div>
+          </div>
 
-            {/* Health Check + Regenerate */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Health Check + Regenerate</h3>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Regenerate</span>
-                </button>
+          <div className="lg:col-span-8">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="flex border-b border-gray-200">
+                {TABS.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => handleTabChange(id)}
+                    className={`flex-1 py-4 px-6 text-center font-medium ${
+                      tabData.selectedTab === id
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-
-              {/* KPI Grid 1 */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-4">KPI Grid 1</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {kpiData1.map((kpi, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <kpi.icon className="w-5 h-5 text-indigo-500" />
-                        <span className={`text-sm font-medium ${
-                          kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {kpi.change}
-                        </span>
-                      </div>
-                      <h5 className="text-sm text-gray-600 mb-1">{kpi.title}</h5>
-                      <p className="text-xl font-bold text-gray-900">{kpi.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* KPI Grid 2 */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-4">KPI Grid 2</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {kpiData2.map((kpi, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <kpi.icon className="w-5 h-5 text-indigo-500" />
-                        <span className={`text-sm font-medium ${
-                          kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {kpi.change}
-                        </span>
-                      </div>
-                      <h5 className="text-sm text-gray-600 mb-1">{kpi.title}</h5>
-                      <p className="text-xl font-bold text-gray-900">{kpi.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Extras */}
-              <div>
-                <h4 className="font-medium text-gray-900 mb-4">Extras</h4>
-                <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h5 className="font-medium text-indigo-900">Advanced Analytics</h5>
-                      <p className="text-sm text-indigo-700">Deep insights and reporting tools</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <div className="p-8">{renderTabContent()}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}
