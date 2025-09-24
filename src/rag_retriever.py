@@ -21,3 +21,7 @@ def retrieve_augmented_prompt(query: str, top_k: int = 4, section_filter=None):
     context = "\n\n".join([f"[{r['meta']['startup_name']}:{r['meta']['section']}] {r['text']}" for r in results])
     aug = f"Context:\n{context}\n\nInstruction: Using the context, answer the user’s request precisely."
     return aug, results
+
+def retrieve_context(query: str, top_k: int = 4, section_filter=None) -> str:
+    aug, _ = retrieve_augmented_prompt(query, top_k=top_k, section_filter=section_filter)
+    return aug
