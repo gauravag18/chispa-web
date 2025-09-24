@@ -1,5 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+
 # dependencies
 /node_modules
 /.pnp
@@ -10,19 +11,24 @@
 !.yarn/releases
 !.yarn/versions
 
+
 # testing
 /coverage
+
 
 # next.js
 /.next/
 /out/
 
+
 # production
 /build
+
 
 # misc
 .DS_Store
 *.pem
+
 
 # debug
 npm-debug.log*
@@ -30,12 +36,51 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+
 # env files (can opt-in for committing if needed)
 .env*
+
 
 # vercel
 .vercel
 
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# AI/ML pipeline
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+/model_checkpoints/
+/cache/
+*.pt
+*.pth
+*.bin
+*.ckpt
+/data/
+/logs/
+/env/
+/venv/
+.DS_Store
+
+# Large files & temp
+*.csv
+*.tsv
+*.json
+*.parquet
+*.zip
+*.tar.gz
+*.tar
+
+# FastAPI uploads
+/uploads/
+/uploads/*
+
+# Trainer checkpoints
+checkpoints/
+
+# Misc
+*.log
