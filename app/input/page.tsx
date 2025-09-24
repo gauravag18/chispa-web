@@ -1,5 +1,6 @@
 'use client';
-import { useState, useCallback, useMemo } from 'react';
+
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -95,27 +96,43 @@ function LockableInput({
   label: string;
   description: string;
 }) {
-  const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const inputValue = e.target.value.trim();
-      onChange(field, inputValue);
-      if (inputValue) {
-        onSubmit(field, inputValue);
-      }
+  const [showAnimation, setShowAnimation] = useState(false);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(field, e.target.value);
     },
-    [field, onChange, onSubmit],
+    [field, onChange],
   );
 
+  const handleSubmitInternal = useCallback(() => {
+    if (value.trim()) {
+      setShowAnimation(true); // Trigger animation before locking
+      setTimeout(() => {
+        onSubmit(field, value);
+        setShowAnimation(false); // Reset after animation
+      }, 500); // Match animation duration
+    }
+  }, [field, value, onSubmit]);
+
+  useEffect(() => {
+    if (locked && showAnimation) {
+      const timer = setTimeout(() => setShowAnimation(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [locked, showAnimation]);
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 max-w-xl"> {/* Added max-w-xl to match input width */}
       <div className="flex items-center space-x-2">
         <label className="text-lg font-semibold text-gray-900">{label}</label>
         <span className="text-red-500">*</span>
       </div>
       <p className="text-gray-600">{description}</p>
       {locked ? (
-        <div className="relative group">
-          <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-orange-100 text-gray-800 flex items-center justify-between relative">
+        <div className="relative group max-w-xl"> {/* Added max-w-xl to locked state */}
+          <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
+            <div className="slide-in-green"></div>
             <span className="flex-1 pr-4 z-10">{value || `No ${field} entered`}</span>
             <button
               type="button"
@@ -128,17 +145,13 @@ function LockableInput({
           </div>
         </div>
       ) : (
-        <div onBlur={handleBlur}>
-          <PlaceholdersAndVanishInput
-            placeholders={placeholders}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value)}
-            onSubmit={(e: React.FormEvent) => {
-              e.preventDefault();
-              if (value.trim()) onSubmit(field, value);
-            }}
-            value={value}
-          />
-        </div>
+        <PlaceholdersAndVanishInput
+          placeholders={placeholders}
+          value={value}
+          onChange={handleChange}
+          onSubmit={handleSubmitInternal}
+          className={showAnimation ? 'animate-vanish-final' : ''}
+        />
       )}
     </div>
   );
@@ -210,7 +223,7 @@ export default function InputPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
+      {/* Enhanced Header */}
       <div className="bg-orange-500 shadow-lg rounded-2xl my-5">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
@@ -226,7 +239,6 @@ export default function InputPage() {
 
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-12 gap-12">
-          {/* Left Sidebar */}
           <div className="lg:col-span-4 space-y-8">
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Complete Your Profile</h3>
@@ -259,7 +271,6 @@ export default function InputPage() {
             </div>
           </div>
 
-          {/* Right Main Inputs */}
           <div className="lg:col-span-8">
             <div className="bg-orange-50 rounded-2xl shadow-lg border border-orange-200 overflow-hidden">
               <div className="p-8 space-y-8">
@@ -286,10 +297,11 @@ export default function InputPage() {
                     <label className="text-lg font-semibold text-gray-900">Target Audience</label>
                     <span className="text-red-500">*</span>
                   </div>
-                  <p className="text-gray-700">Who are you building this for?</p>
+                  <p className="text-gray-600">Who are you building this for?</p>
                   {lockedFields.targetAudience ? (
-                    <div className="relative group">
-                      <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-orange-100 text-gray-800 flex items-center justify-between relative">
+                    <div className="relative group max-w-xl"> {/* Added max-w-xl */}
+                      <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
+                        <div className="slide-in-green"></div>
                         <span className="flex-1 pr-4 z-10">
                           {formData.targetAudience || 'No audience selected'}
                         </span>
@@ -366,10 +378,10 @@ export default function InputPage() {
 
                 <div className="space-y-3">
                   <label className="text-lg font-semibold text-gray-900">Supporting Documents</label>
-                  <p className="text-gray-700">
+                  <p className="text-gray-600">
                     Upload screenshots, competitor analysis, market research, or any relevant files
                   </p>
-                  <div className="border-2 border-dashed border-orange-300 bg-orange-50 rounded-xl p-6 hover:border-orange-400 hover:bg-orange-100 transition-all duration-200">
+                  <div className="border-2 border-dashed border-teal-300 bg-teal-50 rounded-xl p-6 hover:border-teal-400 hover:bg-teal-100 transition-all duration-200">
                     <FileUpload onChange={handleFileUpload} />
                   </div>
                   {formData.uploads.length > 0 && (
@@ -379,7 +391,7 @@ export default function InputPage() {
                         {formData.uploads.map((file, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-200 hover:bg-orange-100 transition-colors duration-200"
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
                           >
                             <div className="flex items-center space-x-3">
                               <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -406,7 +418,7 @@ export default function InputPage() {
                 </div>
               </div>
 
-              <div className="bg-orange-100 px-8 py-6 border-t border-orange-200">
+              <div className="bg-gray-50 px-8 py-6 border-t border-orange-200">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-600">
                     {isFormValid ? (
@@ -421,7 +433,7 @@ export default function InputPage() {
                     disabled={!isFormValid}
                     className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform ${
                       isFormValid
-                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 hover:scale-105 shadow-lg hover:shadow-xl'
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
                         : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -431,7 +443,6 @@ export default function InputPage() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -43,7 +43,7 @@ const AnimatedCircle = () => (
 
 const ArrowRight = () => (
   <svg
-    className="h-5 w-5 text-orange-500 mt-0.5"
+    className="h-5 w-5 text-black-500 mt-0.5"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -71,7 +71,7 @@ export default function DashboardPage({
 
   const renderTabContent = () => {
     const cardClass =
-      "bg-orange-50 p-6 rounded-xl border border-orange-200 shadow-sm";
+      "bg-white-50 p-6 rounded-xl border border-black-200 shadow-sm";
 
     switch (tabData.selectedTab) {
       case "personas":
