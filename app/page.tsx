@@ -2,12 +2,39 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { WorldMapDemo } from "../components/ui/world-map-demo";
+import { FloatingDock } from "../components/ui/floating-dock";
+import { IconArrowUp, IconHistory, IconHome } from "@tabler/icons-react";
 
 export default function Home() {
+  const dockItems = [
+    {
+      title: "Home",
+      icon: (
+        <IconHome className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      ),
+      href: "/",
+    },
+    {
+      title: "Input",
+      icon: (
+        <IconArrowUp className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      ),
+      href: "/input",
+    },
+    {
+      title: "History",
+      icon: (
+        <IconHistory className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      ),
+      href: "/history",
+    },
+  ];
+
   return (
     <main className="relative text-gray-900">
+
       {/* Hero */}
-      <section className="py-16 px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto">
+      <section className="py-8 px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto">
         {/* Left Side: CHISPA Content */}
         <div className="flex-[2] text-center md:text-left">
           <motion.h1
@@ -52,8 +79,7 @@ export default function Home() {
           </div>
         </motion.div>
       </section>
-
-      {/* Problem Section */}
+      {/* Pain Point Section */}
       <motion.section
         id="problem"
         className="py-8 px-6"
@@ -71,11 +97,10 @@ export default function Home() {
           </p>
         </div>
       </motion.section>
-
       {/* Solution Section */}
       <motion.section
         id="solution"
-        className="py-8 px-6"
+        className="py-8 px-6 pb-16" // Added pb-16 for extra scroll space
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -125,6 +150,13 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+      {/* Floating Dock */}
+      <FloatingDock
+        desktopClassName="fixed bottom-4 left-1/2 -translate-x-1/2"
+        mobileClassName="fixed bottom-4 right-4"
+        items={dockItems}
+      />
     </main>
   );
 }
