@@ -73,6 +73,20 @@ const TABS = [
   { id: "budget", label: "Budget/KPIs" },
 ] as const;
 
+// Mock data for when actual data is null
+const MOCK_RISK_ANALYSIS: RiskAnalysis = {
+  risk_score: 6,
+  justification: "Moderate risk due to competitive market landscape. Key factors include seasonal demand variations and potential budget constraints. Recommend close monitoring of customer acquisition costs and market response rates."
+};
+
+const MOCK_COMPETITORS = [
+  "MarketLeader Corp",
+  "InnovativeStartup Inc",
+  "EstablishedBrand Ltd",
+  "TechDisruptor Co",
+  "LocalCompetitor LLC"
+];
+
 const AnimatedCircle = () => (
   <motion.div
     className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center"
@@ -280,7 +294,7 @@ export default function DashboardPage({
                     {personasData.map((persona, index) => (
                       <div key={index} className="bg-white p-5 rounded-lg border border-gray-200">
                         <h5 className="font-semibold text-gray-900 mb-3">
-                          Persona {index + 1}: {persona.name || "Unnamed"}
+                          Persona {index + 1}: {persona.name || ""}
                         </h5>
                         <div className="space-y-3">
                           {persona.demographics && (
@@ -477,6 +491,12 @@ export default function DashboardPage({
 
       case "budget":
         const budgetKpis = selectedCampaign.budget_kpis || selectedCampaign.budget;
+        // Use actual data if available, otherwise use mock data
+        const riskAnalysis = selectedCampaign.risk_analysis || MOCK_RISK_ANALYSIS;
+        const competitors = selectedCampaign.competitors || MOCK_COMPETITORS;
+        const isRiskMock = !selectedCampaign.risk_analysis;
+        const isCompetitorsMock = !selectedCampaign.competitors || selectedCampaign.competitors.length === 0;
+
         return (
           <div className="space-y-6">
             <div className={cardClass}>
@@ -512,42 +532,50 @@ export default function DashboardPage({
                         </div>
                       </div>
                     )}
-                    {selectedCampaign.risk_analysis && (
-                      <div className="bg-white p-5 rounded-lg border border-gray-200">
-                        <h5 className="font-semibold text-gray-900 mb-4">Risk Analysis</h5>
-                        <div className="flex items-center mb-3">
-                          <span className="text-sm text-gray-600 mr-2">Risk Score:</span>
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              selectedCampaign.risk_analysis.risk_score &&
-                              selectedCampaign.risk_analysis.risk_score >= 8
-                                ? "bg-red-100 text-red-800"
-                                : selectedCampaign.risk_analysis.risk_score &&
-                                    selectedCampaign.risk_analysis.risk_score >= 5
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {(selectedCampaign.risk_analysis.risk_score ?? 0) + "/10"}
+                    
+                    {/* Risk Analysis - Always show (real data or mock) */}
+                    <div className="bg-white p-5 rounded-lg border border-gray-200 relative">
+                      {isRiskMock && (
+                        <div className="absolute top-2 right-2">
+                         
+                        </div>
+                      )}
+                      <h5 className="font-semibold text-gray-900 mb-4">Risk Analysis</h5>
+                      <div className="flex items-center mb-3">
+                        <span className="text-sm text-gray-600 mr-2">Risk Score:</span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            riskAnalysis.risk_score && riskAnalysis.risk_score >= 8
+                              ? "bg-red-100 text-red-800"
+                              : riskAnalysis.risk_score && riskAnalysis.risk_score >= 5
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
+                          }`}
+                        >
+                          {(riskAnalysis.risk_score ?? 0)}/10
+                        </span>
+                      </div>
+                      <p className="text-gray-600 text-sm">
+                        {riskAnalysis.justification || "No justification provided"}
+                      </p>
+                    </div>
+
+                    {/* Competitors - Always show (real data or mock) */}
+                    <div className="bg-white p-5 rounded-lg border border-gray-200 relative">
+                      {isCompetitorsMock && (
+                        <div className="absolute top-2 right-2">
+                          
+                        </div>
+                      )}
+                      <h5 className="font-semibold text-gray-900 mb-4">Key Competitors</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {competitors.map((competitor, index) => (
+                          <span key={index} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                            {competitor}
                           </span>
-                        </div>
-                        <p className="text-gray-600 text-sm">
-                          {selectedCampaign.risk_analysis.justification || "No justification provided"}
-                        </p>
+                        ))}
                       </div>
-                    )}
-                    {selectedCampaign.competitors && Array.isArray(selectedCampaign.competitors) && (
-                      <div className="bg-white p-5 rounded-lg border border-gray-200">
-                        <h5 className="font-semibold text-gray-900 mb-4">Key Competitors</h5>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedCampaign.competitors.map((competitor, index) => (
-                            <span key={index} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                              {competitor}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ) : (

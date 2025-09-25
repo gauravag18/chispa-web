@@ -182,9 +182,9 @@ export default function History() {
                           {campaign.title || campaign.campaign_name || `Campaign ${campaign.id}`}
                         </h3>
 
-                        <p className="text-sm text-gray-600 leading-relaxed">
+                        {/* <p className="text-sm text-gray-600 leading-relaxed">
                           {campaign.description || "No description available"}
-                        </p>
+                        </p> */}
                       </div>
                     </motion.div>
                   ))}
