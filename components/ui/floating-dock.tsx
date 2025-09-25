@@ -1,5 +1,3 @@
-/* eslint-disable prefer-const */
-
 "use client";
 import { cn } from "@/lib/utils";
 import { IconLayoutNavbarCollapse } from "@tabler/icons-react";
@@ -38,6 +36,7 @@ const FloatingDockMobile = ({
   className?: string;
 }) => {
   const [open, setOpen] = useState(false);
+
   return (
     <div className={cn("relative block md:hidden", className)}>
       <AnimatePresence>
@@ -50,22 +49,16 @@ const FloatingDockMobile = ({
               <motion.div
                 key={item.title}
                 initial={{ opacity: 0, y: 10 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{
                   opacity: 0,
                   y: 10,
-                  transition: {
-                    delay: idx * 0.05,
-                  },
+                  transition: { delay: idx * 0.05 },
                 }}
                 transition={{ delay: (items.length - 1 - idx) * 0.05 }}
               >
                 <a
                   href={item.href}
-                  key={item.title}
                   className="group flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-neutral-900 transition-colors duration-200 group-hover:bg-black"
                 >
                   <div className="h-4 w-4 [&>svg]:transition-colors [&>svg]:duration-200 group-hover:[&>svg]:text-orange-500">
@@ -77,6 +70,7 @@ const FloatingDockMobile = ({
           </motion.div>
         )}
       </AnimatePresence>
+
       <button
         onClick={() => setOpen(!open)}
         className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-neutral-800"
@@ -95,13 +89,14 @@ const FloatingDockDesktop = ({
   className?: string;
 }) => {
   const mouseX = useMotionValue(Infinity);
+
   return (
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
         "mx-auto hidden h-16 items-end gap-4 rounded-2xl bg-slate-800/25 backdrop-blur-lg border border-orange-300/30 shadow-xl shadow-orange-500/15 px-4 pb-3 md:flex",
-        className,
+        className
       )}
     >
       {items.map((item) => (
@@ -117,7 +112,7 @@ function IconContainer({
   icon,
   href,
 }: {
-  mouseX: MotionValue;
+  mouseX: MotionValue<number>;
   title: string;
   icon: React.ReactNode;
   href: string;
@@ -127,35 +122,19 @@ function IconContainer({
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });
+
   const widthTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
   const heightTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
   const widthTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
-  const heightTransformIcon = useTransform(
-    distance,
-    [-150, 0, 150],
-    [20, 40, 20],
-  );
-  const width = useSpring(widthTransform, {
-    mass: 0.1,
-    stiffness: 150,
-    damping: 12,
-  });
-  const height = useSpring(heightTransform, {
-    mass: 0.1,
-    stiffness: 150,
-    damping: 12,
-  });
-  const widthIcon = useSpring(widthTransformIcon, {
-    mass: 0.1,
-    stiffness: 150,
-    damping: 12,
-  });
-  const heightIcon = useSpring(heightTransformIcon, {
-    mass: 0.1,
-    stiffness: 150,
-    damping: 12,
-  });
+  const heightTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
+
+  const width = useSpring(widthTransform, { mass: 0.1, stiffness: 150, damping: 12 });
+  const height = useSpring(heightTransform, { mass: 0.1, stiffness: 150, damping: 12 });
+  const widthIcon = useSpring(widthTransformIcon, { mass: 0.1, stiffness: 150, damping: 12 });
+  const heightIcon = useSpring(heightTransformIcon, { mass: 0.1, stiffness: 150, damping: 12 });
+
   const [hovered, setHovered] = useState(false);
+
   return (
     <a href={href} className="group">
       <motion.div
@@ -177,6 +156,7 @@ function IconContainer({
             </motion.div>
           )}
         </AnimatePresence>
+
         <motion.div
           style={{ width: widthIcon, height: heightIcon }}
           className="flex items-center justify-center [&>svg]:transition-colors [&>svg]:duration-200 group-hover:[&>svg]:text-orange-500"
