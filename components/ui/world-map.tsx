@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 "use client";
 import { useRef } from "react";
 import { motion } from "framer-motion";
@@ -48,16 +46,15 @@ export function WorldMap({
 
   return (
     <div className="w-full aspect-[2/1] rounded-lg relative font-sans">
-      {/* Using img instead of Image because this is a dynamically generated SVG data URL that doesn't benefit from Next.js optimization */}
-
-     <Image
-  src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-  alt="world map"
-  width={1056}
-  height={495}
-  className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
-  unoptimized
-/>
+      {/* Using next/image with the "unoptimized" prop because this is a dynamically generated SVG data URL that doesn't benefit from Next.js optimization. */}
+      <Image
+        src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
+        alt="world map"
+        width={1056}
+        height={495}
+        className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
+        unoptimized
+      />
       <svg
         ref={svgRef}
         viewBox="0 0 800 400"
