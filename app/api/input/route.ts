@@ -23,9 +23,10 @@ export async function POST(req: Request) {
     if (error) throw error;
 
     return NextResponse.json({ input: data }, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? "Unexpected error" }, { status: 500 });
-  }
+  } catch (err) {
+  const errorMessage = (err as Error)?.message ?? "Unexpected error";
+  return NextResponse.json({ error: errorMessage }, { status: 500 });
+}
 }
 
 // GET → fetch all inputs
@@ -40,7 +41,8 @@ export async function GET() {
     if (error) throw error;
 
     return NextResponse.json({ inputs: data });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? "Unexpected error" }, { status: 500 });
-  }
+  } catch (err) {
+  const errorMessage = (err as Error)?.message ?? "Unexpected error";
+  return NextResponse.json({ error: errorMessage }, { status: 500 });
+}
 }

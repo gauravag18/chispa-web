@@ -19,10 +19,8 @@ export async function GET(req: Request, { params }: Params) {
     if (error) throw error;
 
     return NextResponse.json({ campaign: data });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message ?? "Unexpected error" },
-      { status: 500 }
-    );
-  }
+  } catch (err) {
+  const errorMessage = (err as Error)?.message ?? "Unexpected error";
+  return NextResponse.json({ error: errorMessage }, { status: 500 });
+}
 }

@@ -1,14 +1,20 @@
 # app/api.py
 from fastapi import FastAPI, Form
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from src.generate_strategy import generate_dashboard
 import os
 
-# Create an __init__.py file in the 'src' and 'app' directories if they don't exist
-# touch src/__init__.py
-# touch app/__init__.py
-
 app = FastAPI(title="Chispa GTM Strategy Generator")
+
+# ✅ Add CORS middleware here
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (POST, GET, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 @app.post("/generate_strategy")
 def generate_strategy_endpoint(

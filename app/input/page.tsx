@@ -288,9 +288,10 @@ export default function InputPage() {
       const campaignId = savedDashboard.campaign?.id;
       router.push(`/dashboard/${campaignId}`);
 
-    } catch (error: any) {
-      console.error("Submit failed:", error.message);
-    }
+    } catch (error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error("Submit failed:", message);
+}
   }, [formData, isFormValid, API_BASE, router]);
 
   const isFieldCompleted = useCallback((field: string) => {
@@ -353,7 +354,7 @@ export default function InputPage() {
                   <div>
                     <h5 className="font-medium text-indigo-700 mb-3">Target Audience</h5>
                     <ul className="text-sm text-gray-600 space-y-2 pl-4">
-                      <li>• Be specific - "small businesses" is better than "everyone"</li>
+                      <li>• Be specific - small bussineses is better than everyone</li>
                       <li>• Consider demographics, pain points, and buying behavior</li>
                       <li>• Start narrow, then expand once you validate the market</li>
                     </ul>
@@ -364,7 +365,7 @@ export default function InputPage() {
                     <ul className="text-sm text-gray-600 space-y-2 pl-4">
                       <li>• Focus on outcomes, not features</li>
                       <li>• Include measurable benefits (time saved, cost reduced)</li>
-                      <li>• Make it clear why you're better than alternatives</li>
+                      <li>• Make it clear why you are better than alternatives</li>
                     </ul>
                   </div>
                   
