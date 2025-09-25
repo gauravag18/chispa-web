@@ -1,31 +1,60 @@
-# src/generate_strategy.py
-from transformers import pipeline
-from .rag_retriever import retrieve_context
-from .multimodal_processor import process_input
-from .agent_optimizer import optimize
+import json
+import google.generativeai as genai
+import os
 import yaml
 from pathlib import Path
+from dotenv import load_dotenv
+from .rag_retriever import retrieve_context
 
-_cfg = yaml.safe_load(Path("config.yaml").read_text(encoding="utf-8"))
-MODEL_PATH = _cfg.get("model_path", "Dhairyaa/Fine-tuned-bart-model-for-marketing-strategies")
+# --- Load Config and Models ---
+config = yaml.safe_load(Path("config.yaml").read_text(encoding="utf-8"))
+load_dotenv()
 
-generator = pipeline("summarization", model=MODEL_PATH)
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+gemini_model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
-def _gen(aug_prompt: str, instruction: str) -> str:
-    text = f"{aug_prompt}\n\nTask: {instruction}"
-    return generator(text, max_length=512, truncation=True)[0]["summary_text"]
+# --- Main Generation Function ---
+def generate_dashboard(user_input: dict) -> dict:
+    user_query = f"Business Idea: {user_input['business_idea']} for {user_input['target_audience']} with the value proposition: {user_input['value_proposition']}"
+    
+    # Step 1: Retrieve context using RAG
+    rag_context = retrieve_context(query=user_query, top_k=config['rag']['top_k'])
+    
+    print("\nRetrieved RAG context. Now generating dashboard with a structured JSON prompt...")
 
-def generate_dashboard(input_json: dict) -> dict:
-    query = process_input(input_json)
-    aug_prompt = retrieve_context(query, top_k=_cfg.get("rag_top_k", 3))
-    return {
-        "personas": _gen(optimize(aug_prompt, "personas"), "Generate 2–3 personas with demographics, pains, and goals."),
-        "messaging": _gen(optimize(aug_prompt, "messaging"), "Write Google Ads, LinkedIn posts, and tweets aligned to personas."),
-        "channels": _gen(optimize(aug_prompt, "channels"), "Rank channels with 1–2 line justifications."),
-        "calendar": _gen(optimize(aug_prompt, "calendar"), "Outline a 30‑day content calendar with daily posts."),
-        "budget_kpis": _gen(optimize(aug_prompt, "budget_kpis"), "Propose lean vs growth budgets with suggested KPIs."),
-    }
+    # Step 2: Create a single, powerful prompt that asks for JSON output
+    prompt = f"""
+    You are a world-class Go-to-Market (GTM) strategy expert. Your task is to generate a complete GTM plan as a single, valid JSON object. Do not include any text outside of the JSON object.
 
-def regenerate_for_tab(tab: str, prompt: str) -> str:
-    # Allow UI to pass a focused prompt; still run through generator
-    return generator(prompt, max_length=512, truncation=True)[0]["summary_text"]
+    **User's Business Idea:**
+    "{user_query}"
+
+    **Context from similar companies (use this for inspiration):**
+    ---
+    {rag_context}
+    ---
+
+    **Your task is to generate a JSON object with the following structure:**
+    - "persona": A user persona object. object should have "title", "pain_points", and "goals".
+    - "messaging": An object with keys like "google_ads" and "linkedin_post". "google_ads" should contain "headlines" (an array of strings) and a "description".
+    - "channels": An array of 3 strings, each describing a suggested marketing channel.
+    - "calendar": An array of 7 objects for a one-week content calendar. Each object should have "day", "activity", and "caption".
+    - "budget_kpis": An object containing "lean_budget_proposal" (an array of strings for different phases) and "kpis" (an array of strings).
+    - "risk_analysis": An object with a "risk_score" (an integer from 1 to 10, where 10 is high risk) and a "justification" (a brief explanation for the score).
+    
+    Generate the JSON object now.
+    """
+    
+    try:
+        response = gemini_model.generate_content(prompt)
+        
+        # Clean the response to ensure it's a valid JSON string
+        # Models sometimes add ```json ... ``` which needs to be removed
+        clean_json_string = response.text.replace("```json", "").replace("```", "").strip()
+        
+        # Convert the clean string into a Python dictionary
+        return json.loads(clean_json_string)
+        
+    except Exception as e:
+        print(f"An error occurred with the Gemini API or JSON parsing: {e}")
+        return {"error": "Failed to generate or parse the strategy plan."}
