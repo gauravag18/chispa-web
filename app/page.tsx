@@ -51,7 +51,6 @@ export default function Home() {
                 key={idx}
                 className="inline-block"
                 custom={idx}
-                variants={letterVariants}
                 initial="hidden"
                 animate="visible"
               >

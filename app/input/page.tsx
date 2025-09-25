@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -147,10 +148,8 @@ function LockableInput({
       ) : (
         <PlaceholdersAndVanishInput
           placeholders={placeholders}
-          value={value}
           onChange={handleChange}
           onSubmit={handleSubmitInternal}
-          className={showAnimation ? 'animate-vanish-final' : ''}
         />
       )}
     </div>
@@ -172,6 +171,7 @@ export default function InputPage() {
     customAudience: false,
     uniqueValueProposition: false,
   });
+  const router = useRouter();
 
   const handleInputChange = useCallback((field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -210,11 +210,88 @@ export default function InputPage() {
     );
   }, [formData]);
 
-  const handleSubmit = useCallback(() => {
-    if (isFormValid) {
-      console.log('Form submitted:', formData);
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
+  const handleSubmit = useCallback(async () => {
+    if (!isFormValid) return;
+
+    try {
+      // Optional: convert uploads to metadata if storing
+      const uploadsMeta = formData.uploads?.map(file => ({
+        name: file.name,
+        type: file.type,
+        size: file.size
+      })) || [];
+
+      // 1️⃣ Save raw form input to DB
+      const saveInputRes = await fetch("/api/input", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          business_idea: formData.businessIdea,
+          target_audience: formData.targetAudience,
+          unique_value_proposition: formData.uniqueValueProposition,
+          tag: null,
+          uploads: uploadsMeta
+        })
+      });
+
+      if (!saveInputRes.ok) {
+        const errText = await saveInputRes.text();
+        throw new Error(`Failed to save input: ${errText}`);
+      }
+
+      const savedInput = await saveInputRes.json();
+      console.log("Saved input:", savedInput);
+
+      // 2️⃣ Call FastAPI to generate dashboard (optional)
+      const formDataToSend = new FormData();
+      if (formData.businessIdea) formDataToSend.append("business_idea", formData.businessIdea);
+      if (formData.targetAudience) formDataToSend.append("target_audience", formData.targetAudience);
+      if (formData.uniqueValueProposition)
+        formDataToSend.append("value_proposition", formData.uniqueValueProposition);
+
+      if (formData.uploads && formData.uploads.length > 0) {
+        formData.uploads.forEach(file => formDataToSend.append("file", file));
+      }
+
+      const res = await fetch(`${API_BASE}/generate_strategy`, {
+        method: "POST",
+        body: formDataToSend
+      });
+
+      if (!res.ok) throw new Error(`FastAPI error: ${res.statusText}`);
+      const dashboardData = await res.json();
+      console.log("Generated dashboard:", dashboardData);
+
+      // 3️⃣ Save generated dashboard to Supabase
+      const saveDashboardRes = await fetch("/api/dashboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.businessIdea || "Untitled",
+          tag: null,
+          personas: dashboardData.personas,
+          messaging: dashboardData.messaging,
+          channels: dashboardData.channels,
+          calendar: dashboardData.calendar,
+          budget_kpis: dashboardData.budget_kpis
+        })
+      });
+
+      if (!saveDashboardRes.ok) {
+        const errText = await saveDashboardRes.text();
+        throw new Error(`Failed to save dashboard: ${errText}`);
+      }
+
+      const savedDashboard = await saveDashboardRes.json();
+      const campaignId = savedDashboard.campaign?.id;
+      router.push(`/dashboard/${campaignId}`);
+
+    } catch (error: any) {
+      console.error("Submit failed:", error.message);
     }
-  }, [formData, isFormValid]);
+  }, [formData, isFormValid, API_BASE, router]);
 
   const isFieldCompleted = useCallback((field: string) => {
     if (field === 'uploads') return formData.uploads.length > 0;
@@ -262,7 +339,7 @@ export default function InputPage() {
               </div>
 
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
-                <h4 className="font-semibold text-gray-900 mb-6 text-xl">💡 Pro Tips for Success</h4>
+                <h4 className="font-semibold text-gray-900 mb-6 text-xl">Pro Tips for Success</h4>
                 <div className="space-y-6">
                   <div>
                     <h5 className="font-medium text-indigo-700 mb-3">Business Idea</h5>
@@ -303,7 +380,7 @@ export default function InputPage() {
                   
                   <div className="bg-white rounded-xl p-4 border border-indigo-200">
                     <p className="text-sm text-indigo-600 font-medium">
-                      ⚡ Quick Tip: The more detailed and specific your inputs, the better and more actionable your generated strategy will be!
+                      Quick Tip: The more detailed and specific your inputs, the better and more actionable your generated strategy will be!
                     </p>
                   </div>
                 </div>
@@ -482,13 +559,6 @@ export default function InputPage() {
                         <p className="text-sm text-gray-600">Receive a step-by-step roadmap with prioritized actions to launch and grow your business effectively.</p>
                       </div>
                     </div>
-                    {/* <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-orange-200">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium text-sm">4</div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-1">Export & Share</h4>
-                        <p className="text-sm text-gray-600">Download your strategy as a PDF or share it with team members and potential investors.</p>
-                      </div>
-                    </div> */}
                   </div>
                 </div>
 

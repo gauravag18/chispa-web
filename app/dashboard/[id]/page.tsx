@@ -1,7 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useParams, useRouter } from "next/navigation";
+
+interface Campaign {
+  id: string;
+  campaign_name?: string;
+  personas?: any;
+  messaging?: any;
+  channels?: any;
+  calendar?: any;
+  budget?: any;
+  created_at: string;
+}
 
 interface TabData {
   campaignName: string;
@@ -58,16 +70,113 @@ const ArrowRight = () => (
 );
 
 export default function DashboardPage({
-  initialCampaignName = "",
+  initialCampaignName = "abc",
 }: DashboardPageProps) {
+  const params = useParams();
+  const router = useRouter();
+  const campaignId = params?.id as string;
+
   const [tabData, setTabData] = useState<TabData>({
     campaignName: initialCampaignName,
     selectedTab: "personas",
   });
+  
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch specific campaign by ID
+  const fetchCampaignById = async (id: string) => {
+    try {
+      const response = await fetch(`/api/dashboard/${id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        return data.campaign;
+      } else {
+        throw new Error(data.error || 'Failed to fetch campaign');
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Fetch all campaigns for the dropdown
+  const fetchAllCampaigns = async () => {
+    try {
+      const response = await fetch('/api/dashboard');
+      const data = await response.json();
+      
+      if (response.ok) {
+        return data.campaigns || [];
+      } else {
+        throw new Error(data.error || 'Failed to fetch campaigns');
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Main effect to fetch data based on URL
+  useEffect(() => {
+    const loadCampaignData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (campaignId) {
+          // If we have a specific campaign ID from the URL, fetch that campaign
+          const [specificCampaign, allCampaigns] = await Promise.all([
+            fetchCampaignById(campaignId),
+            fetchAllCampaigns()
+          ]);
+
+          setCampaigns(allCampaigns);
+          setSelectedCampaign(specificCampaign);
+          setTabData(prev => ({
+            ...prev,
+            campaignName: specificCampaign.campaign_name || "Untitled Campaign"
+          }));
+        } else {
+          // If no specific ID, fetch all campaigns and select the first one
+          const allCampaigns = await fetchAllCampaigns();
+          setCampaigns(allCampaigns);
+          
+          if (allCampaigns && allCampaigns.length > 0) {
+            setSelectedCampaign(allCampaigns[0]);
+            setTabData(prev => ({
+              ...prev,
+              campaignName: allCampaigns[0].campaign_name || "Untitled Campaign"
+            }));
+            // Update URL to reflect the selected campaign
+            router.replace(`/dashboard/${allCampaigns[0].id}`);
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch campaign data');
+        console.error('Error fetching campaign data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCampaignData();
+  }, [campaignId, router]);
 
   const handleTabChange = useCallback((tab: string) => {
     setTabData((prev) => ({ ...prev, selectedTab: tab }));
   }, []);
+
+  const handleCampaignChange = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setTabData(prev => ({
+      ...prev,
+      campaignName: campaign.campaign_name || "Untitled Campaign"
+    }));
+    // Update URL to reflect the new campaign
+    router.push(`/dashboard/${campaign.id}`);
+  };
 
   const handleRegenerate = useCallback(() => {
     console.log("Regenerate button clicked");
@@ -78,183 +187,291 @@ export default function DashboardPage({
     const cardClass =
       "bg-white-50 p-6 rounded-xl border border-black-200 shadow-sm";
 
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <span className="ml-2 text-gray-600">Loading campaign data...</span>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-red-600 text-center">
+            <p className="text-lg font-medium">Error loading campaign</p>
+            <p className="text-sm">{error}</p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (!selectedCampaign) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500 text-center">
+            <p className="text-lg font-medium">Campaign not found</p>
+            <p className="text-sm">The requested campaign could not be found</p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              View All Campaigns
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     switch (tabData.selectedTab) {
       case "personas":
+        const personasData = selectedCampaign.personas;
         return (
           <div className="space-y-6">
             <div className={cardClass}>
-              <h4 className="font-medium text-gray-900 mb-4">
-                Persona 1: Young Professional
-              </h4>
-              <ul className="text-gray-800 space-y-2 text-sm">
-                <li>
-                  <strong>Demographics:</strong> 25-35 years old, urban, single
-                  or newly married
-                </li>
-                <li>
-                  <strong>Pain Points:</strong> Limited time, high career
-                  ambitions, tech-savvy
-                </li>
-                <li>
-                  <strong>Behaviors:</strong> Active on LinkedIn, values
-                  efficiency, prefers mobile apps
-                </li>
-              </ul>
-              <h4 className="font-medium text-gray-900 mt-6 mb-4">
-                Persona 2: Small Business Owner
-              </h4>
-              <ul className="text-gray-800 space-y-2 text-sm">
-                <li>
-                  <strong>Demographics:</strong> 30-50 years old, suburban, 1-10
-                  employees
-                </li>
-                <li>
-                  <strong>Pain Points:</strong> Budget constraints, lack of
-                  marketing expertise
-                </li>
-                <li>
-                  <strong>Behaviors:</strong> Seeks cost-effective solutions,
-                  active in local business groups
-                </li>
-              </ul>
+              {personasData ? (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Campaign Personas</h4>
+                  <pre className="text-gray-800 text-sm bg-gray-50 p-4 rounded overflow-auto">
+                    {JSON.stringify(personasData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">
+                    Persona 1: Young Professional
+                  </h4>
+                  <ul className="text-gray-800 space-y-2 text-sm">
+                    <li>
+                      <strong>Demographics:</strong> 25-35 years old, urban, single
+                      or newly married
+                    </li>
+                    <li>
+                      <strong>Pain Points:</strong> Limited time, high career
+                      ambitions, tech-savvy
+                    </li>
+                    <li>
+                      <strong>Behaviors:</strong> Active on LinkedIn, values
+                      efficiency, prefers mobile apps
+                    </li>
+                  </ul>
+                  <h4 className="font-medium text-gray-900 mt-6 mb-4">
+                    Persona 2: Small Business Owner
+                  </h4>
+                  <ul className="text-gray-800 space-y-2 text-sm">
+                    <li>
+                      <strong>Demographics:</strong> 30-50 years old, suburban, 1-10
+                      employees
+                    </li>
+                    <li>
+                      <strong>Pain Points:</strong> Budget constraints, lack of
+                      marketing expertise
+                    </li>
+                    <li>
+                      <strong>Behaviors:</strong> Seeks cost-effective solutions,
+                      active in local business groups
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         );
+      
       case "messaging":
+        const messagingData = selectedCampaign.messaging;
         return (
           <div className="space-y-6">
             <div className={cardClass}>
-              <h4 className="font-medium text-gray-900 mb-4">Sample Slogans</h4>
-              <ul className="text-gray-800 space-y-2 text-sm">
-                <li>"Empower Your Future: Unleash Limitless Possibilities"</li>
-                <li>"Grow Smarter, Not Harder: Your Success, Our Mission"</li>
-              </ul>
-              <h4 className="font-medium text-gray-900 mt-6 mb-4">Email Copy</h4>
-              <p className="text-gray-800 text-sm">
-                Subject: Transform Your Business Today!
-                <br />
-                Hi [Name],
-                <br />
-                Ready to take your business to the next level? Our platform
-                offers tailored solutions to save you time and boost your
-                growth. Join thousands of satisfied customers and start today!
-                <br />
-              </p>
+              {messagingData ? (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Campaign Messaging</h4>
+                  <pre className="text-gray-800 text-sm bg-gray-50 p-4 rounded overflow-auto">
+                    {JSON.stringify(messagingData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Sample Slogans</h4>
+                  <ul className="text-gray-800 space-y-2 text-sm">
+                    <li>"Empower Your Future: Unleash Limitless Possibilities"</li>
+                    <li>"Grow Smarter, Not Harder: Your Success, Our Mission"</li>
+                  </ul>
+                  <h4 className="font-medium text-gray-900 mt-6 mb-4">Email Copy</h4>
+                  <p className="text-gray-800 text-sm">
+                    Subject: Transform Your Business Today!
+                    <br />
+                    Hi [Name],
+                    <br />
+                    Ready to take your business to the next level? Our platform
+                    offers tailored solutions to save you time and boost your
+                    growth. Join thousands of satisfied customers and start today!
+                    <br />
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         );
+      
       case "channels":
+        const channelsData = selectedCampaign.channels;
         return (
           <div className="space-y-6">
             <div className={cardClass}>
-              <table className="w-full text-left text-gray-800 text-sm">
-                <thead>
-                  <tr className="border-b border-orange-200">
-                    <th className="py-3 font-medium">Rank</th>
-                    <th className="py-3 font-medium">Channel</th>
-                    <th className="py-3 font-medium">Justification</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-orange-200">
-                    <td className="py-3">1</td>
-                    <td>Social Media</td>
-                    <td>High engagement, cost-effective, broad reach</td>
-                  </tr>
-                  <tr className="border-b border-orange-200">
-                    <td className="py-3">2</td>
-                    <td>Email Marketing</td>
-                    <td>Personalized, high ROI, direct communication</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3">3</td>
-                    <td>SEO</td>
-                    <td>Long-term visibility, organic traffic growth</td>
-                  </tr>
-                </tbody>
-              </table>
+              {channelsData ? (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Channel Ranking</h4>
+                  <pre className="text-gray-800 text-sm bg-gray-50 p-4 rounded overflow-auto">
+                    {JSON.stringify(channelsData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div>
+                  <table className="w-full text-left text-gray-800 text-sm">
+                    <thead>
+                      <tr className="border-b border-orange-200">
+                        <th className="py-3 font-medium">Rank</th>
+                        <th className="py-3 font-medium">Channel</th>
+                        <th className="py-3 font-medium">Justification</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-orange-200">
+                        <td className="py-3">1</td>
+                        <td>Social Media</td>
+                        <td>High engagement, cost-effective, broad reach</td>
+                      </tr>
+                      <tr className="border-b border-orange-200">
+                        <td className="py-3">2</td>
+                        <td>Email Marketing</td>
+                        <td>Personalized, high ROI, direct communication</td>
+                      </tr>
+                      <tr>
+                        <td className="py-3">3</td>
+                        <td>SEO</td>
+                        <td>Long-term visibility, organic traffic growth</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         );
+      
       case "calendar":
+        const calendarData = selectedCampaign.calendar;
         return (
           <div className="space-y-6">
             <div className={cardClass}>
-              <table className="w-full text-left text-gray-800 text-sm">
-                <thead>
-                  <tr className="border-b border-orange-200">
-                    <th className="py-3 font-medium">Date</th>
-                    <th className="py-3 font-medium">Task</th>
-                    <th className="py-3 font-medium">Channel</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-orange-200">
-                    <td className="py-3">Oct 1, 2025</td>
-                    <td>Launch campaign announcement</td>
-                    <td>Social Media</td>
-                  </tr>
-                  <tr className="border-b border-orange-200">
-                    <td className="py-3">Oct 5, 2025</td>
-                    <td>Send promotional email</td>
-                    <td>Email</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3">Oct 10, 2025</td>
-                    <td>Publish blog post</td>
-                    <td>Website</td>
-                  </tr>
-                </tbody>
-              </table>
+              {calendarData ? (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Content Calendar</h4>
+                  <pre className="text-gray-800 text-sm bg-gray-50 p-4 rounded overflow-auto">
+                    {JSON.stringify(calendarData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div>
+                  <table className="w-full text-left text-gray-800 text-sm">
+                    <thead>
+                      <tr className="border-b border-orange-200">
+                        <th className="py-3 font-medium">Date</th>
+                        <th className="py-3 font-medium">Task</th>
+                        <th className="py-3 font-medium">Channel</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-orange-200">
+                        <td className="py-3">Oct 1, 2025</td>
+                        <td>Launch campaign announcement</td>
+                        <td>Social Media</td>
+                      </tr>
+                      <tr className="border-b border-orange-200">
+                        <td className="py-3">Oct 5, 2025</td>
+                        <td>Send promotional email</td>
+                        <td>Email</td>
+                      </tr>
+                      <tr>
+                        <td className="py-3">Oct 10, 2025</td>
+                        <td>Publish blog post</td>
+                        <td>Website</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         );
+      
       case "budget":
+        const budgetData = selectedCampaign.budget;
         return (
           <div className="space-y-6">
             <div className={cardClass}>
-              <h4 className="font-medium text-gray-900 mb-4">Budget Allocation</h4>
-              <table className="w-full text-left text-gray-800 text-sm">
-                <thead>
-                  <tr className="border-b border-orange-200">
-                    <th className="py-3 font-medium">Category</th>
-                    <th className="py-3 font-medium">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-orange-200">
-                    <td className="py-3">Social Media Ads</td>
-                    <td>$2,000</td>
-                  </tr>
-                  <tr className="border-b border-orange-200">
-                    <td className="py-3">Email Marketing</td>
-                    <td>$1,000</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3">Content Creation</td>
-                    <td>$1,500</td>
-                  </tr>
-                </tbody>
-              </table>
-              <h4 className="font-medium text-gray-900 mt-6 mb-4">
-                Key Performance Indicators
-              </h4>
-              <ul className="text-gray-800 space-y-2 text-sm">
-                <li>
-                  <strong>Click-Through Rate:</strong> Target 2.5% on email
-                  campaigns
-                </li>
-                <li>
-                  <strong>Engagement Rate:</strong> Target 10% on social media
-                  posts
-                </li>
-                <li>
-                  <strong>Conversion Rate:</strong> Target 5% on landing pages
-                </li>
-              </ul>
+              {budgetData ? (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Budget & KPIs</h4>
+                  <pre className="text-gray-800 text-sm bg-gray-50 p-4 rounded overflow-auto">
+                    {JSON.stringify(budgetData, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">Budget Allocation</h4>
+                  <table className="w-full text-left text-gray-800 text-sm">
+                    <thead>
+                      <tr className="border-b border-orange-200">
+                        <th className="py-3 font-medium">Category</th>
+                        <th className="py-3 font-medium">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-orange-200">
+                        <td className="py-3">Social Media Ads</td>
+                        <td>$2,000</td>
+                      </tr>
+                      <tr className="border-b border-orange-200">
+                        <td className="py-3">Email Marketing</td>
+                        <td>$1,000</td>
+                      </tr>
+                      <tr>
+                        <td className="py-3">Content Creation</td>
+                        <td>$1,500</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <h4 className="font-medium text-gray-900 mt-6 mb-4">
+                    Key Performance Indicators
+                  </h4>
+                  <ul className="text-gray-800 space-y-2 text-sm">
+                    <li>
+                      <strong>Click-Through Rate:</strong> Target 2.5% on email
+                      campaigns
+                    </li>
+                    <li>
+                      <strong>Engagement Rate:</strong> Target 10% on social media
+                      posts
+                    </li>
+                    <li>
+                      <strong>Conversion Rate:</strong> Target 5% on landing pages
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         );
+      
       default:
         return null;
     }
@@ -272,6 +489,26 @@ export default function DashboardPage({
             <p className="text-orange-100 text-lg opacity-90">
               Transform your idea into a comprehensive strategy
             </p>
+            
+            {/* Campaign Selector */}
+            {campaigns.length > 1 && (
+              <div className="mt-4">
+                <select
+                  value={selectedCampaign?.id || ''}
+                  onChange={(e) => {
+                    const campaign = campaigns.find(c => c.id === e.target.value);
+                    if (campaign) handleCampaignChange(campaign);
+                  }}
+                  className="bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 backdrop-blur-sm"
+                >
+                  {campaigns.map((campaign) => (
+                    <option key={campaign.id} value={campaign.id} className="text-gray-900">
+                      {campaign.campaign_name || `Campaign ${campaign.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <button
             onClick={handleRegenerate}
@@ -322,6 +559,19 @@ export default function DashboardPage({
                   </button>
                 ))}
               </div>
+              
+              {/* Campaign Info */}
+              {selectedCampaign && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h4 className="font-medium text-gray-900 mb-2">Campaign Info</h4>
+                  <p className="text-sm text-gray-600">
+                    Created: {new Date(selectedCampaign.created_at).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    ID: {selectedCampaign.id}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Campaign Tips */}
