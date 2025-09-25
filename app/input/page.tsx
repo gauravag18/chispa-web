@@ -123,14 +123,14 @@ function LockableInput({
   }, [locked, showAnimation]);
 
   return (
-    <div className="space-y-3 max-w-xl"> {/* Added max-w-xl to match input width */}
+    <div className="space-y-3 max-w-xl">
       <div className="flex items-center space-x-2">
         <label className="text-lg font-semibold text-gray-900">{label}</label>
         <span className="text-red-500">*</span>
       </div>
       <p className="text-gray-600">{description}</p>
       {locked ? (
-        <div className="relative group max-w-xl"> {/* Added max-w-xl to locked state */}
+        <div className="relative group max-w-xl">
           <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
             <div className="slide-in-green"></div>
             <span className="flex-1 pr-4 z-10">{value || `No ${field} entered`}</span>
@@ -224,7 +224,7 @@ export default function InputPage() {
   return (
     <div className="min-h-screen">
       {/* Enhanced Header */}
-      <div className="bg-orange-500 shadow-lg rounded-2xl my-5">
+      <div className="bg-slate-900 shadow-lg rounded-2xl my-5">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-2">
@@ -239,40 +239,80 @@ export default function InputPage() {
 
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Complete Your Profile</h3>
-              <div className="space-y-6">
-                {FORM_FIELDS.map(({ field, label }, index) => (
-                  <div key={field} className="flex items-center space-x-4">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isFieldCompleted(field)
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-gray-100 text-gray-400'
-                      }`}
-                    >
-                      {isFieldCompleted(field) ? <CheckIcon /> : index + 1}
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-8 space-y-8">
+              <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">Complete Your Profile</h3>
+                <div className="space-y-6">
+                  {FORM_FIELDS.map(({ field, label }, index) => (
+                    <div key={field} className="flex items-center space-x-4">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          isFieldCompleted(field)
+                            ? 'bg-green-100 text-green-600'
+                            : 'bg-gray-100 text-gray-400'
+                        }`}
+                      >
+                        {isFieldCompleted(field) ? <CheckIcon /> : index + 1}
+                      </div>
+                      <span className="text-gray-700">{label}</span>
                     </div>
-                    <span className="text-gray-700">{label}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
-              <h4 className="font-semibold text-gray-900 mb-3">💡 Pro Tips</h4>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Be specific about your target market</li>
-                <li>• Focus on unique benefits, not features</li>
-                <li>• Include measurable outcomes when possible</li>
-                <li>• Upload competitor analysis for better insights</li>
-              </ul>
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
+                <h4 className="font-semibold text-gray-900 mb-6 text-xl">💡 Pro Tips for Success</h4>
+                <div className="space-y-6">
+                  <div>
+                    <h5 className="font-medium text-indigo-700 mb-3">Business Idea</h5>
+                    <ul className="text-sm text-gray-600 space-y-2 pl-4">
+                      <li>• Focus on solving a real problem people face daily</li>
+                      <li>• Keep it simple - complex ideas are harder to execute</li>
+                      <li>• Research if similar solutions already exist</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h5 className="font-medium text-indigo-700 mb-3">Target Audience</h5>
+                    <ul className="text-sm text-gray-600 space-y-2 pl-4">
+                      <li>• Be specific - "small businesses" is better than "everyone"</li>
+                      <li>• Consider demographics, pain points, and buying behavior</li>
+                      <li>• Start narrow, then expand once you validate the market</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h5 className="font-medium text-indigo-700 mb-3">Value Proposition</h5>
+                    <ul className="text-sm text-gray-600 space-y-2 pl-4">
+                      <li>• Focus on outcomes, not features</li>
+                      <li>• Include measurable benefits (time saved, cost reduced)</li>
+                      <li>• Make it clear why you're better than alternatives</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h5 className="font-medium text-indigo-700 mb-3">Supporting Documents</h5>
+                    <ul className="text-sm text-gray-600 space-y-2 pl-4">
+                      <li>• Upload competitor analysis for better insights</li>
+                      <li>• Include market research or customer feedback</li>
+                      <li>• Add mockups, wireframes, or product screenshots</li>
+                      <li>• Financial projections help validate viability</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-white rounded-xl p-4 border border-indigo-200">
+                    <p className="text-sm text-indigo-600 font-medium">
+                      ⚡ Quick Tip: The more detailed and specific your inputs, the better and more actionable your generated strategy will be!
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="lg:col-span-8">
-            <div className="bg-orange-50 rounded-2xl shadow-lg border border-orange-200 overflow-hidden">
+            <div className="bg-orange-50 rounded-2xl shadow-lg border border-orange-200 overflow-hidden min-h-full">
               <div className="p-8 space-y-8">
                 <LockableInput
                   field="businessIdea"
@@ -299,7 +339,7 @@ export default function InputPage() {
                   </div>
                   <p className="text-gray-600">Who are you building this for?</p>
                   {lockedFields.targetAudience ? (
-                    <div className="relative group max-w-xl"> {/* Added max-w-xl */}
+                    <div className="relative group max-w-xl">
                       <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
                         <div className="slide-in-green"></div>
                         <span className="flex-1 pr-4 z-10">
@@ -320,7 +360,7 @@ export default function InputPage() {
                       value={formData.targetAudience}
                       onChange={(e) => handleInputChange('targetAudience', e.target.value)}
                       onBlur={(e) => handleInputSubmit('targetAudience', e.target.value)}
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-gray-800"
+                      className="w-full max-w-xl p-4 border-2 border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-gray-800"
                       required
                     >
                       <option value="">Select your target audience</option>
@@ -416,6 +456,74 @@ export default function InputPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Additional content to extend height */}
+                <div className="space-y-6 pt-8 border-t border-orange-200">
+                  <h3 className="text-lg font-semibold text-gray-900">What happens next?</h3>
+                  <div className="grid gap-4">
+                    <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-orange-200">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium text-sm">1</div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Strategy Generation</h4>
+                        <p className="text-sm text-gray-600">Our AI analyzes your inputs to create a comprehensive business strategy tailored to your specific needs.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-orange-200">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium text-sm">2</div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Market Analysis</h4>
+                        <p className="text-sm text-gray-600">Get insights on market opportunities, competitive landscape, and potential challenges in your industry.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-orange-200">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium text-sm">3</div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Action Plan</h4>
+                        <p className="text-sm text-gray-600">Receive a step-by-step roadmap with prioritized actions to launch and grow your business effectively.</p>
+                      </div>
+                    </div>
+                    {/* <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-orange-200">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium text-sm">4</div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Export & Share</h4>
+                        <p className="text-sm text-gray-600">Download your strategy as a PDF or share it with team members and potential investors.</p>
+                      </div>
+                    </div> */}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-orange-100 to-yellow-50 rounded-xl p-10 mt-10 border border-orange-200">
+                  <h4 className="font-medium text-gray-900 mb-6">Expected Output Preview</h4>
+                  <div className="space-y-3 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Executive Summary (2-3 pages)</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Market Analysis & Competition</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Marketing Strategy & Customer Acquisition</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Financial Projections & Revenue Model</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Risk Assessment & Mitigation</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>90-Day Action Plan</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Spacer to ensure height alignment */}
+                <div className="h-16"></div>
               </div>
 
               <div className="bg-gray-50 px-8 py-6 border-t border-orange-200">
@@ -445,6 +553,9 @@ export default function InputPage() {
           </div>
         </div>
       </div>
+      
+      {/* Extra spacing for scroll */}
+      <div className="h-32"></div>
     </div>
   );
 }

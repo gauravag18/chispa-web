@@ -64,9 +64,11 @@ const FloatingDockMobile = ({
                 <a
                   href={item.href}
                   key={item.title}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-neutral-900"
+                  className="group flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-neutral-900 transition-colors duration-200 group-hover:bg-black"
                 >
-                  <div className="h-4 w-4">{item.icon}</div>
+                  <div className="h-4 w-4 [&>svg]:transition-colors [&>svg]:duration-200 group-hover:[&>svg]:text-orange-500">
+                    {item.icon}
+                  </div>
                 </a>
               </motion.div>
             ))}
@@ -96,7 +98,7 @@ const FloatingDockDesktop = ({
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "mx-auto hidden h-16 items-end gap-4 rounded-2xl bg-gray-50 px-4 pb-3 md:flex dark:bg-neutral-900",
+        "mx-auto hidden h-16 items-end gap-4 rounded-2xl bg-slate-800/25 backdrop-blur-lg border border-orange-300/30 shadow-xl shadow-orange-500/15 px-4 pb-3 md:flex",
         className,
       )}
     >
@@ -153,13 +155,13 @@ function IconContainer({
   });
   const [hovered, setHovered] = useState(false);
   return (
-    <a href={href}>
+    <a href={href} className="group">
       <motion.div
         ref={ref}
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800"
+        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800 transition-colors duration-200 group-hover:bg-black"
       >
         <AnimatePresence>
           {hovered && (
@@ -175,7 +177,7 @@ function IconContainer({
         </AnimatePresence>
         <motion.div
           style={{ width: widthIcon, height: heightIcon }}
-          className="flex items-center justify-center"
+          className="flex items-center justify-center [&>svg]:transition-colors [&>svg]:duration-200 group-hover:[&>svg]:text-orange-500"
         >
           {icon}
         </motion.div>

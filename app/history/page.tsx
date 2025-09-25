@@ -72,7 +72,7 @@ export default function History() {
   return (
     <div className="min-h-screen bg-gray-100 py-0.5">
       {/* Header Section */}
-      <div className="bg-orange-500 shadow-lg rounded-2xl my-5">
+      <div className="bg-slate-900 shadow-lg rounded-2xl my-5">
         <div className="max-w-7xl mx-auto px-6 pt-4 pb-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-2">
@@ -102,8 +102,6 @@ export default function History() {
             </div>
 
             <div className="space-y-4">
-              {/* Subheading for Date Range */}
-              <h3 className="text-lg font-medium text-gray-600">Last 2 Weeks</h3>
               <div className="grid gap-4">
                 {historyItems.map((item, index) => (
                   <motion.div
