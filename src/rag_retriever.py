@@ -1,27 +1,30 @@
 # src/rag_retriever.py
-import json, numpy as np, faiss
+import json
+import numpy as np
+import faiss
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
+import yaml
 
-INDEX_BIN = Path("data/processed/faiss.index")
-DOCSTORE = Path("data/processed/docstore.json")
-model = SentenceTransformer("all-MiniLM-L6-v2")
-index = faiss.read_index(str(INDEX_BIN))
-docstore = json.loads(Path(DOCSTORE).read_text(encoding="utf-8"))
+# Load configuration
+config = yaml.safe_load(Path("config.yaml").read_text(encoding="utf-8"))
 
-def retrieve_augmented_prompt(query: str, top_k: int = 4, section_filter=None):
-    q = model.encode([query], normalize_embeddings=True).astype(np.float32)
-    scores, idxs = index.search(q, top_k)
-    results = []
-    for i in idxs[0]:
-        meta = docstore["metas"][i]
-        if section_filter and meta["section"] not in section_filter:
-            continue
-        results.append({"text": docstore["texts"][i], "meta": meta})
-    context = "\n\n".join([f"[{r['meta']['startup_name']}:{r['meta']['section']}] {r['text']}" for r in results])
-    aug = f"Context:\n{context}\n\nInstruction: Using the context, answer the user’s request precisely."
-    return aug, results
+# Load models and data
+model = SentenceTransformer(config['models']['embedding'])
+index = faiss.read_index(config['paths']['faiss_index'])
+with open(config['paths']['docstore'], 'r', encoding='utf-8') as f:
+    docstore = json.load(f)
 
-def retrieve_context(query: str, top_k: int = 4, section_filter=None) -> str:
-    aug, _ = retrieve_augmented_prompt(query, top_k=top_k, section_filter=section_filter)
-    return aug
+def retrieve_context(query: str, top_k: int) -> str:
+    """
+    Retrieves the most relevant text chunks from the docstore.
+    """
+    q_embedding = model.encode([query], normalize_embeddings=True).astype(np.float32)
+    _, idxs = index.search(q_embedding, top_k)
+    
+    # Get the text content for the retrieved indices
+    results = [docstore["texts"][i] for i in idxs[0]]
+    
+    # Join the results into a single context string
+    context = "\n\n---\n\n".join(results)
+    return context
