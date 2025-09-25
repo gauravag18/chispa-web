@@ -69,6 +69,11 @@ export default function DashboardPage({
     setTabData((prev) => ({ ...prev, selectedTab: tab }));
   }, []);
 
+  const handleRegenerate = useCallback(() => {
+    console.log("Regenerate button clicked");
+    // Add regeneration logic here
+  }, []);
+
   const renderTabContent = () => {
     const cardClass =
       "bg-white-50 p-6 rounded-xl border border-black-200 shadow-sm";
@@ -258,9 +263,9 @@ export default function DashboardPage({
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <div className="bg-orange-500 shadow-lg rounded-2xl mx-5 mt-5">
-        <div className="max-w-7xl mx-auto px-6 pt-4 pb-8">
-          <div className="text-center">
+      <div className="bg-slate-900 shadow-lg rounded-2xl mx-5 mt-5">
+        <div className="max-w-7xl mx-auto px-6 pt-4 pb-8 flex justify-between items-center">
+          <div className="text-center flex-grow">
             <h1 className="text-4xl font-bold text-white mb-2">
               {tabData.campaignName || "Your Marketing Campaign Dashboard"}
             </h1>
@@ -268,6 +273,13 @@ export default function DashboardPage({
               Transform your idea into a comprehensive strategy
             </p>
           </div>
+          <button
+            onClick={handleRegenerate}
+            className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-200"
+          >
+            <AnimatedCircle />
+            <span>Regenerate</span>
+          </button>
         </div>
       </div>
 
