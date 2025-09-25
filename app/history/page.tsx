@@ -1,4 +1,5 @@
 "use client";
+
 import { motion } from "framer-motion";
 
 export default function History() {
@@ -69,21 +70,25 @@ export default function History() {
   };
 
   return (
-    <div className="text-gray-900 min-h-screen w-50%">
-      <motion.div
-        className="w-full border-t-4 border-indigo-600 pt-8 pb-6"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-4xl font-bold text-gray-900">Strategy History Dashboard</h1>
-          <p className="text-gray-600 mt-2">Track your GTM strategies and performance metrics</p>
+    <div className="min-h-screen bg-gray-100 py-0.5">
+      {/* Header Section */}
+      <div className="bg-orange-500 shadow-lg rounded-2xl my-5">
+        <div className="max-w-7xl mx-auto px-6 pt-4 pb-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-2">
+              History Campaign Dashboard
+            </h1>
+            <p className="text-orange-100 text-lg opacity-90">
+              Transform your idea into a comprehensive strategy
+            </p>
+          </div>
         </div>
-      </motion.div>
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 pb-12">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 h-full">
-          
+          {/* Recent Strategies */}
           <motion.div
             className="xl:col-span-2 space-y-6"
             initial={{ opacity: 0, x: -50 }}
@@ -91,50 +96,66 @@ export default function History() {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <div className="flex justify-between items-center">
-              <h2 className="text-3xl font-semibold text-gray-900">Recent Strategies</h2>
+              <h2 className="text-3xl font-semibold text-gray-900">
+                Recent Strategies
+              </h2>
             </div>
-            
-            <div className="grid gap-4">
-              {historyItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  className="p-6 bg-white/40 backdrop-blur-sm rounded-xl border border-white/20 hover:bg-white/60 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-500 cursor-pointer group relative overflow-hidden"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ scale: 1.02, y: -4 }}
-                >
-                  {/* Aurora background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  <div className="relative">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span
-                        className="px-3 py-1 text-xs font-medium rounded-full border"
-                        style={{ 
-                          backgroundColor: industryColors[item.industry]?.bg || "#F3F4F6",
-                          color: industryColors[item.industry]?.text || "#374151",
-                          borderColor: industryColors[item.industry]?.border || "#E5E7EB"
-                        }}
-                      >
-                        {item.industry}
-                      </span>
-                      <p className="text-xs text-gray-400">{item.date}</p>
+
+            <div className="space-y-4">
+              {/* Subheading for Date Range */}
+              <h3 className="text-lg font-medium text-gray-600">Last 2 Weeks</h3>
+              <div className="grid gap-4">
+                {historyItems.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    className="p-6 bg-white/40 backdrop-blur-sm rounded-xl border border-white/20 hover:bg-white/60 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-500 cursor-pointer group relative overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeOut",
+                      delay: index * 0.1,
+                    }}
+                    viewport={{ once: true }}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                  >
+                    {/* Aurora background effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    <div className="relative">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span
+                          className="px-3 py-1 text-xs font-medium rounded-full border"
+                          style={{
+                            backgroundColor:
+                              industryColors[item.industry]?.bg || "#F3F4F6",
+                            color:
+                              industryColors[item.industry]?.text || "#374151",
+                            borderColor:
+                              industryColors[item.industry]?.border ||
+                              "#E5E7EB",
+                          }}
+                        >
+                          {item.industry}
+                        </span>
+                        <p className="text-xs text-gray-400">{item.date}</p>
+                      </div>
+
+                      <h3 className="text-lg font-medium text-gray-900 mb-2 group-hover:text-indigo-700 transition-colors">
+                        {item.title}
+                      </h3>
+
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {item.description}
+                      </p>
                     </div>
-                    
-                    <h3 className="text-lg font-medium text-gray-900 mb-2 group-hover:text-indigo-700 transition-colors">
-                      {item.title}
-                    </h3>
-                    
-                    <p className="text-sm text-gray-600 leading-relaxed">{item.description}</p>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
 
-          {/* Right Side: Stats - Takes 1/3 of space */}
+          {/* Right Side: Stats */}
           <motion.div
             className="space-y-6"
             initial={{ opacity: 0, x: 50 }}
@@ -142,7 +163,7 @@ export default function History() {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <h2 className="text-3xl font-semibold text-gray-900">Analytics</h2>
-            
+
             {/* Stats Grid */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <div className="space-y-4">
@@ -152,10 +173,16 @@ export default function History() {
                     className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100"
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.1 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeOut",
+                      delay: index * 0.1,
+                    }}
                     viewport={{ once: true }}
                   >
-                    <span className="text-sm font-medium text-gray-600">{stat.label}</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      {stat.label}
+                    </span>
                     <span
                       className="text-2xl font-bold"
                       style={{ color: stat.color }}
@@ -169,16 +196,24 @@ export default function History() {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Quick Actions
+              </h3>
               <div className="space-y-3">
                 <button className="w-full p-3 text-left bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors">
-                  <span className="text-indigo-700 font-medium">Create New Strategy</span>
+                  <span className="text-indigo-700 font-medium">
+                    Create New Strategy
+                  </span>
                 </button>
                 <button className="w-full p-3 text-left bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
-                  <span className="text-green-700 font-medium">Export Reports</span>
+                  <span className="text-green-700 font-medium">
+                    Export Reports
+                  </span>
                 </button>
                 <button className="w-full p-3 text-left bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                  <span className="text-purple-700 font-medium">View Analytics</span>
+                  <span className="text-purple-700 font-medium">
+                    View Analytics
+                  </span>
                 </button>
               </div>
             </div>

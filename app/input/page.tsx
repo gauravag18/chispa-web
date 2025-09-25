@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -96,26 +96,41 @@ function LockableInput({
   label: string;
   description: string;
 }) {
-  const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const inputValue = e.target.value;
-      if (inputValue.trim()) {
-        onChange(field, inputValue);
-        onSubmit(field, inputValue);
-      }
+  const [showAnimation, setShowAnimation] = useState(false);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(field, e.target.value);
     },
-    [field, onChange, onSubmit],
+    [field, onChange],
   );
 
+  const handleSubmitInternal = useCallback(() => {
+    if (value.trim()) {
+      setShowAnimation(true); // Trigger animation before locking
+      setTimeout(() => {
+        onSubmit(field, value);
+        setShowAnimation(false); // Reset after animation
+      }, 500); // Match animation duration
+    }
+  }, [field, value, onSubmit]);
+
+  useEffect(() => {
+    if (locked && showAnimation) {
+      const timer = setTimeout(() => setShowAnimation(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [locked, showAnimation]);
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 max-w-xl"> {/* Added max-w-xl to match input width */}
       <div className="flex items-center space-x-2">
         <label className="text-lg font-semibold text-gray-900">{label}</label>
         <span className="text-red-500">*</span>
       </div>
       <p className="text-gray-600">{description}</p>
       {locked ? (
-        <div className="relative group">
+        <div className="relative group max-w-xl"> {/* Added max-w-xl to locked state */}
           <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
             <div className="slide-in-green"></div>
             <span className="flex-1 pr-4 z-10">{value || `No ${field} entered`}</span>
@@ -130,16 +145,13 @@ function LockableInput({
           </div>
         </div>
       ) : (
-        <div onBlur={handleBlur}>
-          <PlaceholdersAndVanishInput
-            placeholders={placeholders}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value)}
-            onSubmit={(e: React.FormEvent) => {
-              e.preventDefault();
-              onSubmit(field, value);
-            }}
-          />
-        </div>
+        <PlaceholdersAndVanishInput
+          placeholders={placeholders}
+          value={value}
+          onChange={handleChange}
+          onSubmit={handleSubmitInternal}
+          className={showAnimation ? 'animate-vanish-final' : ''}
+        />
       )}
     </div>
   );
@@ -168,15 +180,16 @@ export default function InputPage() {
   const handleInputSubmit = useCallback((field: keyof FormData, value: string) => {
     if (value.trim()) {
       setFormData((prev) => ({ ...prev, [field]: value }));
-      setTimeout(() => {
-        setLockedFields((prev) => ({ ...prev, [field]: true }));
-      }, 500);
+      setLockedFields((prev) => ({ ...prev, [field]: true }));
     }
   }, []);
 
   const unlockField = useCallback((field: keyof FormData) => {
     setLockedFields((prev) => ({ ...prev, [field]: false }));
-  }, []);
+    if (!formData[field as keyof FormData]) {
+      setFormData((prev) => ({ ...prev, [field]: '' }));
+    }
+  }, [formData]);
 
   const handleFileUpload = useCallback((newFiles: File[]) => {
     setFormData((prev) => ({ ...prev, uploads: newFiles }));
@@ -205,25 +218,24 @@ export default function InputPage() {
 
   const isFieldCompleted = useCallback((field: string) => {
     if (field === 'uploads') return formData.uploads.length > 0;
-    return Boolean(formData[field as keyof FormData]);
-  }, [formData]);
+    return Boolean(formData[field as keyof FormData]) && lockedFields[field as keyof typeof lockedFields];
+  }, [formData, lockedFields]);
 
   return (
     <div className="min-h-screen">
       {/* Enhanced Header */}
-      <div className="bg-black shadow-lg rounded-2xl my-5">
-  <div className="max-w-7xl mx-auto px-6 py-8">
-    <div className="text-center">
-      <h1 className="text-4xl font-bold text-white mb-2">
-        Business Strategy Generator
-      </h1>
-      <p className="text-indigo-100 text-lg opacity-90">
-        Transform your idea into a comprehensive strategy
-      </p>
-    </div>
-  </div>
-</div>
-
+      <div className="bg-orange-500 shadow-lg rounded-2xl my-5">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Business Strategy Generator
+            </h1>
+            <p className="text-indigo-100 text-lg opacity-90">
+              Transform your idea into a comprehensive strategy
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-12 gap-12">
@@ -260,7 +272,7 @@ export default function InputPage() {
           </div>
 
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="bg-orange-50 rounded-2xl shadow-lg border border-orange-200 overflow-hidden">
               <div className="p-8 space-y-8">
                 <LockableInput
                   field="businessIdea"
@@ -287,7 +299,7 @@ export default function InputPage() {
                   </div>
                   <p className="text-gray-600">Who are you building this for?</p>
                   {lockedFields.targetAudience ? (
-                    <div className="relative group">
+                    <div className="relative group max-w-xl"> {/* Added max-w-xl */}
                       <div className="w-full p-4 border-2 border-green-200 rounded-xl bg-green-50 text-gray-800 flex items-center justify-between relative">
                         <div className="slide-in-green"></div>
                         <span className="flex-1 pr-4 z-10">
@@ -406,13 +418,13 @@ export default function InputPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 px-8 py-6 border-t border-gray-100">
+              <div className="bg-gray-50 px-8 py-6 border-t border-orange-200">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-600">
                     {isFormValid ? (
                       <span className="text-green-600 font-medium">✓ Ready to generate your strategy</span>
                     ) : (
-                      <span>Fill in all required fields to continue</span>
+                      <span></span>
                     )}
                   </div>
                   <button

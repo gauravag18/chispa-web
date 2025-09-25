@@ -2,35 +2,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { WorldMapDemo } from "../components/ui/world-map-demo";
-import { FloatingDock } from "../components/ui/floating-dock";
-import { IconArrowUp, IconHistory, IconHome, IconArrowDown } from "@tabler/icons-react";
+import { IconArrowDown } from "@tabler/icons-react";
 import { useRef } from "react";
 
 export default function Home() {
-  const dockItems = [
-    {
-      title: "Home",
-      icon: (
-        <IconHome className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-      ),
-      href: "/",
-    },
-    {
-      title: "Input",
-      icon: (
-        <IconArrowUp className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-      ),
-      href: "/input",
-    },
-    {
-      title: "History",
-      icon: (
-        <IconHistory className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-      ),
-      href: "/history",
-    },
-  ];
-
   const chispaText = "Chispa".split("");
   const letterVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -52,7 +27,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative text-gray-900 min-h-screen pb-32">
+    <main className="relative text-gray-900 min-h-screen pb-40">
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap');
         .kaushan-script {
@@ -100,7 +75,7 @@ export default function Home() {
           >
             <Link
               href="/input"
-              className="px-10 py-4 rounded-full bg-indigo-600 text-white font-medium shadow-md hover:bg-indigo-700 transition-transform hover:scale-105"
+              className="px-10 py-4 rounded-full bg-orange-500 text-white font-medium shadow-md hover:bg-orange-700 transition-transform hover:scale-105"
             >
               Try It
             </Link>
@@ -120,13 +95,13 @@ export default function Home() {
       </section>
       {/* Explore Section */}
       <motion.section
-        className="py-1 px-6 text-center -mt-12"
+        className="py-1 px-6 text-center -mt-14"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true }}
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto mb-8">
           <button
             onClick={scrollToPainPoint}
             className="flex items-center justify-center mx-auto gap-2 px-8 py-3 rounded-full bg-orange-500 text-white font-medium shadow-md hover:bg-orange-600 transition-transform hover:scale-105"
@@ -140,7 +115,7 @@ export default function Home() {
       <motion.section
         id="problem"
         ref={painPointRef}
-        className="py-12 px-6"
+        className="py-20 px-6"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -174,7 +149,7 @@ export default function Home() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-semibold text-indigo-600 mb-2 text-lg">Input</h3>
+              <h3 className="font-semibold text-orange-600 mb-2 text-lg">Input</h3>
               <p className="text-gray-700 text-base">
                 Founders provide industry, target market, product, and resources.
               </p>
@@ -186,7 +161,7 @@ export default function Home() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-semibold text-indigo-600 mb-2 text-lg">AI Engine</h3>
+              <h3 className="font-semibold text-orange-600 mb-2 text-lg">AI Engine</h3>
               <p className="text-gray-700 text-base">
                 AI synthesizes inputs into GTM strategies, competitor insights,
                 and positioning.
@@ -199,7 +174,7 @@ export default function Home() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="font-semibold text-indigo-600 mb-2 text-lg">Dashboard</h3>
+              <h3 className="font-semibold text-orange-600 mb-2 text-lg">Dashboard</h3>
               <p className="text-gray-700 text-base">
                 Clean, actionable dashboard with downloadable pitch-ready
                 outputs.
@@ -208,12 +183,6 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-      {/* Floating Dock */}
-      <FloatingDock
-        desktopClassName="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
-        mobileClassName="fixed bottom-10 right-6 z-50"
-        items={dockItems}
-      />
     </main>
   );
 }
