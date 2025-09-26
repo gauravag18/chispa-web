@@ -612,7 +612,7 @@ export default function InputPage() {
                     disabled={!isFormValid}
                     className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform ${
                       isFormValid
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
+                        ? 'bg-orange-500  text-white hover:from-indigo-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
                         : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     }`}
                   >

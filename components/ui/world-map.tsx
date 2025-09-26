@@ -1,9 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useRef } from "react";
 import { motion } from "framer-motion";
 import DottedMap from "dotted-map";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 
 interface MapProps {
   dots?: Array<{
@@ -15,18 +15,17 @@ interface MapProps {
 
 export function WorldMap({
   dots = [],
-  lineColor = "#4f46e5", // Changed default to indigo-600 to match CHISPA theme
+  lineColor = "#4f46e5",
 }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const map = new DottedMap({ height: 100, grid: "diagonal" });
-
   const { theme } = useTheme();
 
   const svgMap = map.getSVG({
     radius: 0.22,
     color: theme === "dark" ? "#FFFFFF40" : "#00000040",
     shape: "circle",
-    backgroundColor: "transparent", // Set to transparent to show AuroraBackground
+    backgroundColor: "transparent",
   });
 
   const projectPoint = (lat: number, lng: number) => {
@@ -46,14 +45,9 @@ export function WorldMap({
 
   return (
     <div className="w-full aspect-[2/1] rounded-lg relative font-sans">
-      {/* Using next/image with the "unoptimized" prop because this is a dynamically generated SVG data URL that doesn't benefit from Next.js optimization. */}
-      <Image
-        src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-        alt="world map"
-        width={1056}
-        height={495}
+      <div
         className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
-        unoptimized
+        dangerouslySetInnerHTML={{ __html: svgMap }}
       />
       <svg
         ref={svgRef}
@@ -70,19 +64,10 @@ export function WorldMap({
                 fill="none"
                 stroke="url(#path-gradient)"
                 strokeWidth="1"
-                initial={{
-                  pathLength: 0,
-                }}
-                animate={{
-                  pathLength: 1,
-                }}
-                transition={{
-                  duration: 1,
-                  delay: 0.5 * i,
-                  ease: "easeOut",
-                }}
-                key={`start-upper-${i}`}
-              ></motion.path>
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1, delay: 0.5 * i, ease: "easeOut" }}
+              />
             </g>
           );
         })}
@@ -95,75 +80,6 @@ export function WorldMap({
             <stop offset="100%" stopColor="white" stopOpacity="0" />
           </linearGradient>
         </defs>
-
-        {dots.map((dot, i) => (
-          <g key={`points-group-${i}`}>
-            <g key={`start-${i}`}>
-              <circle
-                cx={projectPoint(dot.start.lat, dot.start.lng).x}
-                cy={projectPoint(dot.start.lat, dot.start.lng).y}
-                r="2"
-                fill={lineColor}
-              />
-              <circle
-                cx={projectPoint(dot.start.lat, dot.start.lng).x}
-                cy={projectPoint(dot.start.lat, dot.start.lng).y}
-                r="2"
-                fill={lineColor}
-                opacity="0.5"
-              >
-                <animate
-                  attributeName="r"
-                  from="2"
-                  to="8"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  from="0.5"
-                  to="0"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
-              </circle>
-            </g>
-            <g key={`end-${i}`}>
-              <circle
-                cx={projectPoint(dot.end.lat, dot.end.lng).x}
-                cy={projectPoint(dot.end.lat, dot.end.lng).y}
-                r="2"
-                fill={lineColor}
-              />
-              <circle
-                cx={projectPoint(dot.end.lat, dot.end.lng).x}
-                cy={projectPoint(dot.end.lat, dot.end.lng).y}
-                r="2"
-                fill={lineColor}
-                opacity="0.5"
-              >
-                <animate
-                  attributeName="r"
-                  from="2"
-                  to="8"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  from="0.5"
-                  to="0"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
-              </circle>
-            </g>
-          </g>
-        ))}
       </svg>
     </div>
   );

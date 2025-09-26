@@ -125,7 +125,7 @@ const ArrowRight = () => (
 );
 
 export default function DashboardPage({
-  initialCampaignName = "abc",
+  initialCampaignName = "",
 }: DashboardPageProps) {
   const params = useParams();
   const router = useRouter();
