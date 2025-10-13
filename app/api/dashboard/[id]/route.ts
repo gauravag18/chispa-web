@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 interface Params {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(req: Request, { params }: Params) {
@@ -20,7 +20,7 @@ export async function GET(req: Request, { params }: Params) {
 
     return NextResponse.json({ campaign: data });
   } catch (err) {
-  const errorMessage = (err as Error)?.message ?? "Unexpected error";
-  return NextResponse.json({ error: errorMessage }, { status: 500 });
-}
+    const errorMessage = (err as Error)?.message ?? "Unexpected error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
 }
