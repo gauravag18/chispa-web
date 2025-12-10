@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion } from "motion/react";
 import DottedMap from "dotted-map";
+import Image from "next/image";
 
 import { useTheme } from "next-themes";
 
@@ -47,14 +48,19 @@ export default function WorldMap({
 
   return (
     <div className="w-full aspect-[2/1] dark:bg-black bg-white rounded-lg  relative font-sans">
-      <img
-        src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-        className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
-        alt="world map"
-        height="495"
-        width="1056"
-        draggable={false}
-      />
+      <Image
+  src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
+  alt="world map"
+  height={495}
+  width={1056}
+  draggable={false}
+  unoptimized   // important for data URI
+  className="
+    h-full w-full
+    [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)]
+    pointer-events-none select-none
+  "
+/>
       <svg
         ref={svgRef}
         viewBox="0 0 800 400"

@@ -61,10 +61,6 @@ interface TabData {
   selectedTab: string;
 }
 
-interface DashboardPageProps {
-  initialCampaignName?: string;
-}
-
 const TABS = [
   { id: "personas", label: "Personas" },
   { id: "messaging", label: "Messaging" },
@@ -125,15 +121,14 @@ const ArrowRight = () => (
 );
 
 export default function DashboardPage({
-  initialCampaignName = "",
-}: DashboardPageProps) {
+}) {
   const params = useParams();
   const router = useRouter();
   // Safely handle params.id, which could be string, string[], or undefined
   const campaignId = Array.isArray(params?.id) ? params.id[0] : params?.id || "";
 
   const [tabData, setTabData] = useState<TabData>({
-    campaignName: initialCampaignName,
+    campaignName: "",
     selectedTab: "personas",
   });
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
