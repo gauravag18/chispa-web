@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+⚡ Chispa – Your AI Go-To-Market Strategy Companion
 
-## Getting Started
+Welcome to Chispa!
+Chispa is an AI-powered startup companion that helps founders craft go-to-market (GTM) strategies, validate ideas, analyze competition, generate positioning, and accelerate execution — instantly.
 
-First, run the development server:
+Whether you're validating a new idea or refining an existing startup, Chispa becomes your AI business co-pilot.
 
-```bash
+🔗 Repository: https://github.com/gauravag18/chispa-web
+
+🌐 Live Link (if any): Add deployment link here
+
+📑 Table of Contents
+
+Overview
+
+Technologies
+
+Packages & Libraries Used
+
+Setup
+
+Environment Variables
+
+Running the App
+
+Features
+
+License
+
+🌐 Overview
+
+Chispa takes your startup idea and turns it into:
+
+🚀 Go-to-market plans
+
+🎯 Target audience segmentation
+
+🧠 Competitive landscape analysis
+
+🏗️ Business model refinement
+
+📈 Marketing + distribution channel recommendations
+
+🤖 Continuous AI guidance for execution
+
+Chispa = Your AI companion for building and launching smarter, faster.
+
+💻 Technologies
+🌐 Web
+
+Next.js (React + TypeScript)
+
+Node.js
+
+Supabase (Auth + DB + Storage)
+
+OpenAI API (AI GTM Strategy Generation)
+
+📦 Packages / Libraries Used
+Package / Library	Purpose
+Next.js	Frontend framework
+TypeScript	Strong typing
+Supabase JS	Authentication, DB access
+OpenAI / GPT APIs	AI strategy generation
+TailwindCSS	UI styling
+Zustand / Redux (if used)	State management
+Axios / Fetch API	API handling
+React Hook Form	Form processing
+Lucide Icons	Clean icon set
+
+🛠️ Setup
+1. Clone the repository
+git clone https://github.com/gauravag18/chispa-web.git
+cd chispa-web
+
+2. Install dependencies
+npm install
+
+3. Configure environment variables
+
+Create a .env.local file in the root:
+
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_public_key
+OPENAI_API_KEY=your_openai_key
+
+
+Add any additional variables your project uses.
+
+▶️ Running the App
+Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Visit:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+👉 [https://chispaglobal.vercel.app/]
 
-## Learn More
+🎯 Features
+🚀 AI-Powered GTM Strategy
 
-To learn more about Next.js, take a look at the following resources:
+Chispa generates:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Customer segments
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Acquisition channels
 
-## Deploy on Vercel
+Value prop & messaging
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pricing recommendations
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Market entry blueprint
+
+
+🧠 Business Idea Validation
+
+🔍 Competitor Analysis
+
+📊 Founder Dashboard
+
+⚡ Instant Strategy Reports
+
+🎨 Clean & Responsive UI
+
+
+📜 License
+
+This project is licensed under the MIT License.
+See the LICENSE file for more details.
+
+⭐ Contribute
+
+Feel free to fork, star ⭐, or open issues & PRs.
+Let’s build the smartest AI startup companion together!
