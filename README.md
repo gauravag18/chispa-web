@@ -34,8 +34,7 @@ Chispa assists founders, students, and entrepreneurs by generating:
 | Frontend   | Next.js, React, TypeScript       |
 | Styling    | TailwindCSS                      |
 | Backend    | Next.js API Routes               |
-| AI         | OpenAI API                       |
-| State      | Zustand / Context API (if used)  |
+| AI         | Gemini API                       |
 | Deployment | Vercel                           |
 
 ## 📦 Packages & Libraries Used
@@ -47,9 +46,7 @@ Chispa assists founders, students, and entrepreneurs by generating:
 | **TailwindCSS**   | Utility-first styling                     |
 | **OpenAI API**    | AI model integration for GTM generation   |
 | **Axios / Fetch** | API calls                                 |
-| **Zustand / Context** | State management                      |
 | **Lucide-React**  | Icons                                     |
-| **Prettier / ESLint** | Code formatting & linting             |
 
 ## 📁 Directory Structure
 
@@ -90,5 +87,6 @@ Clean UI	Modern, responsive interface with TailwindCSS.
 No Auth Required	Start instantly — no signup/login.
 
 📜 License
+
 This project is licensed under the MIT License.
 See the LICENSE file for details.
