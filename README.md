@@ -1,13 +1,10 @@
 ⚡ Chispa – Your AI Go-To-Market Strategy Companion
 
-Welcome to Chispa!
-Chispa is an AI-powered startup companion that helps founders craft go-to-market (GTM) strategies, validate ideas, analyze competition, generate positioning, and accelerate execution — instantly.
+Chispa is an AI-powered business companion that helps founders instantly generate go-to-market (GTM) strategies, validate ideas, analyze markets, and shape winning startup directions.
 
-Whether you're validating a new idea or refining an existing startup, Chispa becomes your AI business co-pilot.
+Give Chispa your startup idea → Get a full GTM plan with positioning, channels, competition, and action steps.
 
 🔗 Repository: https://github.com/gauravag18/chispa-web
-
-🌐 Live Link (if any): Add deployment link here
 
 📑 Table of Contents
 
@@ -16,6 +13,8 @@ Overview
 Technologies
 
 Packages & Libraries Used
+
+Directory Structure
 
 Setup
 
@@ -29,46 +28,61 @@ License
 
 🌐 Overview
 
-Chispa takes your startup idea and turns it into:
+Chispa assists founders, students, and entrepreneurs by generating:
 
-🚀 Go-to-market plans
+🚀 Go-to-market strategies
 
-🎯 Target audience segmentation
+🎯 Target customer segments
 
-🧠 Competitive landscape analysis
+📈 Marketing & distribution channels
 
-🏗️ Business model refinement
+🧠 Competitive insights
 
-📈 Marketing + distribution channel recommendations
+💡 Business model suggestions
 
-🤖 Continuous AI guidance for execution
+🛠️ Execution roadmaps
 
-Chispa = Your AI companion for building and launching smarter, faster.
+Chispa is your AI business partner — helping you go from idea → strategy → execution.
 
 💻 Technologies
-🌐 Web
-
-Next.js (React + TypeScript)
-
-Node.js
-
-Supabase (Auth + DB + Storage)
-
-OpenAI API (AI GTM Strategy Generation)
-
-📦 Packages / Libraries Used
+Category	Technologies
+Frontend	Next.js, React, TypeScript
+Styling	TailwindCSS
+Backend	Next.js API Routes
+AI	OpenAI API
+State	Zustand / Context API (if applicable)
+Deployment	Vercel
+📦 Packages & Libraries Used
 Package / Library	Purpose
-Next.js	Frontend framework
-TypeScript	Strong typing
-Supabase JS	Authentication, DB access
-OpenAI / GPT APIs	AI strategy generation
-TailwindCSS	UI styling
-Zustand / Redux (if used)	State management
-Axios / Fetch API	API handling
-React Hook Form	Form processing
-Lucide Icons	Clean icon set
+Next.js	Core framework for frontend + backend routes
+TypeScript	Static typing for reliability
+TailwindCSS	Utility-first styling
+OpenAI API	AI strategy generation
+Axios / Fetch	API calls
+Zustand / Context	State management
+Lucide-React	Icons
+Prettier / ESLint	Code formatting & linting
+📁 Directory Structure
 
-🛠️ Setup
+A clean structure for clarity:
+
+chispa-web/
+│
+├── app/                     # Next.js App Router
+│   ├── page.tsx             # Home page
+│   ├── api/
+│   │   └── generate/route.ts# AI GTM Strategy API
+│   ├── components/          # Reusable UI components
+│   └── styles/              # Global styles
+│
+├── public/                  # Static assets
+│
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+└── .env.local.example
+
+⚙️ Setup
 1. Clone the repository
 git clone https://github.com/gauravag18/chispa-web.git
 cd chispa-web
@@ -76,59 +90,35 @@ cd chispa-web
 2. Install dependencies
 npm install
 
-3. Configure environment variables
+🔐 Environment Variables
 
-Create a .env.local file in the root:
+Create a .env.local file in the project root:
 
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_public_key
-OPENAI_API_KEY=your_openai_key
+OPENAI_API_KEY=your_openai_api_key
 
 
-Add any additional variables your project uses.
+No authentication (user login) is used in this project.
 
 ▶️ Running the App
-Start development server
+Start the development server
 npm run dev
 
 
-Visit:
+Then visit:
 
-👉 [https://chispaglobal.vercel.app/]
+👉 http://localhost:3000/
 
 🎯 Features
-🚀 AI-Powered GTM Strategy
-
-Chispa generates:
-
-Customer segments
-
-Acquisition channels
-
-Value prop & messaging
-
-Pricing recommendations
-
-Market entry blueprint
-
-
-🧠 Business Idea Validation
-
-🔍 Competitor Analysis
-
-📊 Founder Dashboard
-
-⚡ Instant Strategy Reports
-
-🎨 Clean & Responsive UI
-
-
+Feature	Description
+AI-Powered GTM Strategy	Generates detailed go-to-market strategies tailored to your startup idea.
+Audience Segmentation	Identifies primary, secondary, and niche customer profiles.
+Marketing Channels	Suggests digital, organic, and paid marketing pathways.
+Competitive Insights	Evaluates competitive landscape and your differentiation.
+Value Proposition Builder	Creates positioning, messaging, and USP statements.
+Execution Roadmap	Step-wise plan for validating and launching your idea.
+Clean UI	Simple, modern, responsive UI using TailwindCSS.
+No Auth Required	Start using instantly — no login needed.
 📜 License
 
 This project is licensed under the MIT License.
-See the LICENSE file for more details.
-
-⭐ Contribute
-
-Feel free to fork, star ⭐, or open issues & PRs.
-Let’s build the smartest AI startup companion together!
+See the LICENSE file for details.
